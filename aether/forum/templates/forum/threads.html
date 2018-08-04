@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load forum %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ board.title }} - Forum - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <h3>{{ board.title }}</h3>
+    <div class="container layout-control">
+    {% for thread in threads %}
+        <div class="row forum-thread-row">
+            <div class="col-sm-6">
+                <a href="{% url 'forum:posts' board.id thread.id %}">{{ thread.title }}</a><br/>
+                <small class="text-muted">by {{ thread.user.profile.alias }}</small>
+            </div>
+            <div class="col-sm-1 text-center">
+                {% if can_manage %}
+                <a href="{% url 'forum:toggle_sticky' board.id thread.id %}">
+                {% endif %}
+                {% if thread.sticky %}
+                <i class="fa fa-thumbtack text-warning"></i><br/>
+                <small class="text-warning">Sticky</small>
+                {% else %}
+                <i class="fa fa-sticky-note"></i><br/>
+                <small class="text-muted">Normal</small>
+                {% endif %}
+                {% if can_manage %}
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-sm-1 text-center">
+                {% if can_manage %}
+                <a href="{% url 'forum:toggle_closed' board.id thread.id %}">
+                {% endif %}
+                {% if thread.closed %}
+                <i class="fa fa-lock text-warning"></i><br/>
+                <small class="text-warning">Closed</small>
+                {% else %}
+                <i class="fa fa-unlock"></i><br/>
+                <small class="text-muted">Open</small>
+                {% endif %}
+                {% if can_manage %}
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-sm-1 text-center">
+                {{ thread.total_posts }}<br/>
+                <small class="text-muted">Posts</small>
+            </div>
+            <div class="col-sm-1 text-center">
+                {{ thread.views }}<br/>
+                <small class="text-muted">Views</small>
+            </div>
+            <div class="col-sm-2 text-right">
+                <a href="{% url 'forum:posts' board.id thread.id %}?page={{ thread.last_post|page_for:user }}#{{ thread.last_post.id }}">{{ thread.last_post.created_at }}</a><br/>
+                <small class="text-muted">by {{ thread.last_post.user.profile.alias }}</small>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    <div class="layout-control">
+    {% include 'forum/fragments/pagination.html' with items=threads %}
+    </div>
+    {% if can_write %}
+    <div class="layout-control">
+        <form method="post" action="{% url 'forum:threads' board.id %}">
+            {% crispy form form.helper %}
+        </form>
+    </div>
+    {% endif %}
+{% endblock %}
+

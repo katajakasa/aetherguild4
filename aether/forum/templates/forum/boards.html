@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load forum %}
+
+{% block title %}Forum - {{ block.super }}{% endblock %}
+
+{% block content %}
+    {% for item in sections|readable_by:user %}
+        <h3>{{ item.title }}</h3>
+        <div class="container layout-control-">
+        {% for board in item.visible_boards|readable_by:user %}
+            <div class="row forum-board-row">
+                <div class="col-sm-6">
+                    <a href="{% url 'forum:threads' board.id %}">{{ board.title }}</a><br />
+                    <small class="text-muted">{{ board.description }}</small>
+                </div>
+                <div class="col-sm-1 text-center">
+                    {{ board.total_threads }}<br />
+                    <small class="text-muted">Threads</small>
+                </div>
+                <div class="col-sm-1 text-center">
+                    {{ board.total_posts }}<br />
+                    <small class="text-muted">Posts</small>
+                </div>
+                <div class="col-sm-4 text-right">
+                    <a href="{% url 'forum:posts' board.id board.last_post.thread.id %}?page={{ board.last_post|page_for:user }}#{{ board.last_post.id }}">
+                        {{ board.last_post.thread.title }}
+                    </a><br />
+                    <small class="text-muted">{{ board.last_post.user.profile.alias }}, {{ board.last_post.created_at }}</small>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+{% endblock %}
+

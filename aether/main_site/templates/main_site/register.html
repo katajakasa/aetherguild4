@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - {{ block.super }}{% endblock %}
+
+{% block content %}
+<form method="post" action="{% url 'main_site:register' %}">
+    {% crispy register_form register_form.helper %}
+</form>
+{% endblock %}

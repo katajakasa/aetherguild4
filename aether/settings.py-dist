@@ -1,0 +1,33 @@
+from .common_settings import *
+
+DEBUG = False
+ALLOWED_HOSTS = ['127.0.0.1']
+SECRET_KEY = ''
+OLD_PW_SALT = ""
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'aetherguild',
+        'USER': 'aetherguild',
+        'PASSWORD': 'aetherguild',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+        'CONN_MAX_AGE': 3600
+    },
+    'old': {  # Database to migrate from
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'aetherguild',
+        'USER': 'aetherguild',
+        'PASSWORD': 'aetherguild',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'CONN_MAX_AGE': 3600
+    },
+}
+
+# Initialize email configuration
+EMAIL_BACKEND = make_email_conf(DEBUG)
+
+# Initialize cache configuration
+CACHES = make_cache_conf(DEBUG)

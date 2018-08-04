@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ thread.title }} - Forum - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <h3>{{ thread.title }}</h3>
+
+    {% if can_manage %}
+        <div class="btn-group layout-control" role="group" aria-label="Management buttons">
+            <a href="{% url 'forum:move_thread' thread.board.id thread.id %}" type="button" class="btn btn-secondary">Move thread</a>
+            <a href="{% url 'forum:delete_thread' thread.board.id thread.id %}" type="button" class="btn btn-warning">Delete thread</a>
+        </div>
+    {% endif %}
+
+    <div class="container layout-control">
+    {% for post in posts %}
+        <div class="row forum-post-row" id="{{ post.id }}">
+            <div class="col-sm-2">
+                {{ post.user.profile.alias }}<br />
+                {% if post.user.profile.avatar %}
+                    <img src="{{ post.user.profile.avatar_thumbnail.url }}" width="120" height="120" alt="Avatar">
+                {% endif %}
+                <small class="text-muted">Joined {{ post.user.date_joined }}</small><br />
+                {% if post.user.is_staff %}
+                    <small class="text-muted">Administrator</small>
+                {% endif %}
+            </div>
+            <div class="col-sm-10">
+                <small class="text-muted">
+                    Posted: {{ post.created_at }}
+                    {% if can_manage or post.user.id == user.id %}
+                        &middot; <a href="{% url 'forum:edit_post' thread.board.id thread.id post.id %}">Edit post</a>
+                    {% endif %}
+                </small>
+                <br />
+                {{ post.message.rendered }}
+
+                {% for edit in post.visible_edits %}
+                    <small class="text-muted">Edited on {{ edit.created_at }} by {{ edit.editor }}: {{ edit.message }}</small><br />
+                {% endfor %}
+
+                {% if post.user.profile.signature.rendered %}
+                <hr />
+                <small class="text-muted">{{ post.user.profile.signature.rendered }}</small>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="layout-control">
+    {% include 'forum/fragments/pagination.html' with items=posts %}
+    </div>
+
+    {% if not thread.closed and can_write %}
+        <div class="layout-control">
+        <form method="post" action="{% url 'forum:posts' thread.board.id thread.id %}">
+            {% crispy form form.helper %}
+        </form>
+        </div>
+    {% endif %}
+{% endblock %}
+

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Move thread - {{ thread.title }} - Forum - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <h3>Move thread</h3>
+
+    <form method="post" action="{% url 'forum:move_thread' thread.board.id thread.id %}">
+        {% crispy form form.helper %}
+    </form>
+{% endblock %}
+

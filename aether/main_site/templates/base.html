@@ -1,0 +1,89 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}Aether{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:locale" content="en_EN" />
+    <meta property="og:url" content="https://aetherguild.net" />
+    <meta property="og:title" content="Æther - A Gaming guild" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aetherguild" />
+    <link href="https://fonts.googleapis.com/css?family=Exo+2|Lato" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+          integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'bootstrap4/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'sceditor/themes/modern.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'custom.css' %}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="jumbotron-fluid banner-bar">
+        <div class="container">
+            <h1 class="display-3">Æther</h1>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-sm">
+        <div class="container">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'main_site:index' %}">News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'main_site:faq' %}">FAQ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'forum:boards' %}">Forum</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'main_site:profile' %}">Profile</a>
+                </li>
+                {% if user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'main_site:logout' %}">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">{{ user.profile.alias }}</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'main_site:register' %}">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'main_site:login' %}">Login</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    <script src="{% static 'jquery3/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'bootstrap4/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'sceditor/jquery.sceditor.bbcode.min.js' %}"></script>
+    <script>
+    $('.bbcode_field').sceditor({
+        format: 'bbcode',
+        style: '{% static 'sceditor/themes/content/default.min.css' %}',
+        emoticonsEnabled: false,
+        autoUpdate: true,
+        bbcodeTrim: true,
+        width: '100%',
+        height: '400px',
+        toolbar: 'bold,italic,underline,strike|color,removeformat|cut,paste,pastetext|bulletlist,orderedlist|code,quote|image,link,unlink,youtube|date,time|print,maximize,source'
+    });
+</script>
+</body>
+</html>

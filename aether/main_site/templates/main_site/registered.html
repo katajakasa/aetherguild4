@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+
+{% block title %}Registered - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <p>You have been registered. You may now <a href="{% url 'main_site:login' %}">log in</a>.</p>
+{% endblock %}

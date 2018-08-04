@@ -1,0 +1,61 @@
+{% extends 'base.html' %}{% load static %}
+
+{% block title %}FAQ - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <dl class="faq">
+        <dt>
+            So what is this about ?
+        </dt>
+        <dd>
+            This is a website for a gaming guild called Æther. We are involved in several games, eg.
+            World of Warcraft, Guild Wars 2, World of Tanks, Minecraft, etc.
+            On WoW, we can be found on server Magtheridon-EU, faction Alliance.
+        </dd>
+    </dl>
+    <dl class="faq">
+        <dt>
+            Okay, so what kind of guild are you, then ?
+        </dt>
+        <dd>
+            We are a relatively small, established, social and friendly gaming guild. We spend our time in several games,
+            depending on what we happen to feel like doing. Currently we are spending time with the Warlords of Draenor expansion.
+        </dd>
+    </dl>
+    <dl class="faq">
+        <dt>
+            Who's your guild leader ? Do you have any officers ?
+        </dt>
+        <dd>
+            Well, technically yes. However, nobody seems to care anymore. Mostly we just talk things over
+            with the group, so I guess you could call us a democracy :)
+        </dd>
+    </dl>
+    <dl class="faq">
+        <dt>
+            Democracy, eh? So how is it working for you ?
+        </dt>
+        <dd>
+            Surprisingly well, actually. We are still clearing raids and doing stuff
+            as a guild, so i guess that says something ? :P
+        </dd>
+    </dl>
+    <dl class="faq">
+        <dt>
+            So, can I join?
+        </dt>
+        <dd>
+            Eh, maybe ? Write an application on our public forums, and we'll talk about it :)
+        </dd>
+    </dl>
+    <dl class="faq">
+        <dt>
+            So guys, wtf ? A game ? Aren't you taking this a bit too seriously ?
+        </dt>
+        <dd>
+            No. Here, have a carrot.<br /><br />
+            <img src="{% static 'carrots.jpg' %}" alt="Yum carrots!" width="448" height="302" />
+        </dd>
+    </dl>
+{% endblock %}
+

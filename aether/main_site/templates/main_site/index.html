@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}News - {{ block.super }}{% endblock %}
+
+{% block content %}
+    <div class="container layout-control">
+    {% for item in news_items %}
+        <div class="news_item">
+            <div class="header"><h3>{{ item.header }}</h3></div>
+            <div class="message">{{ item.message.rendered }}</div>
+            <footer class="blockquote-footer">Posted by {{ item.nickname }} at {{ item.created_at }}</footer>
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="layout-control">
+    {% include 'forum/fragments/pagination.html' with items=news_items %}
+    </div>
+{% endblock %}
+

@@ -1,0 +1,82 @@
+.banner-bar {
+    margin-bottom: 0;
+    padding: 1rem 2rem 0.5rem 2rem;
+    background: url(/static/banner.png) center no-repeat;
+    background-size: cover;
+}
+
+.navbar {
+    padding: 0;
+    background-color: #0d161f;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-family: 'Exo 2', sans-serif;
+    font-weight: bold !important;
+}
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4, h5 { font-size: 1.2rem;}
+
+h1,h2,h3,h4,h5 { margin-top: 0.5rem; }
+
+.layout-control {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* BBCode */
+
+.bbcode-quote {
+    background-color: #303030;
+    padding: 0.5rem;
+    border: 1px solid #505050;
+}
+
+.bbcode-code {
+    background-color: #303030;
+    padding: 0.5rem;
+    border: 1px solid #505050;
+}
+
+/* NEWS */
+
+.news_item {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.news_item { border-bottom: 1px solid #404040; }
+.news_item:last-child { border-bottom: 0; padding-bottom: 0; }
+.news_item:first-child { padding-top: 0; }
+
+/* FORUM */
+
+.forum-board-row, .forum-thread-row, .forum-post-row {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.forum-post-row img,
+.news_item img {
+    max-width: 800px;
+}
+
+.forum-post-row {
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+}
+
+.page-item.active .page-link {
+    background-color: #202020 !important
+}
+
+.page-item .page-link {
+    background-color: #303030 !important;
+}
+
+.forum-post-row { border-bottom: 1px solid #404040; }
+.forum-post-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.forum-post-row:first-child { padding-top: 0; }
+.forum-post-row hr { border-top: 1px dotted #404040; margin-bottom: 0.25rem; }
