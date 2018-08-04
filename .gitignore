@@ -1,0 +1,7 @@
+.idea
+venv
+.venv
+aether/settings.py
+content
+*.pyc
+__pycache__
