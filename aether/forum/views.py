@@ -40,7 +40,7 @@ def threads(request, board_id):
     return render(request, 'forum/threads.html', {
         'board': board,
         'threads': paginator.get_page(page),
-        'can_manage': request.user.has_perm('can_manage_boards'),
+        'can_manage': request.user.has_perm('forum.can_manage_boards'),
         'can_write': board.can_write(request.user),
         'form': form
     })
@@ -80,7 +80,7 @@ def posts(request, board_id, thread_id):
         'thread': thread,
         'form': form,
         'posts': paginator.get_page(page),
-        'can_manage': request.user.has_perm('can_manage_boards'),
+        'can_manage': request.user.has_perm('forum.can_manage_boards'),
         'can_write': thread.board.can_write(request.user)
     })
 
@@ -93,7 +93,7 @@ def edit_post(request, board_id, thread_id, post_id):
     # User must be either admin or owner of the post
     # User must have write rights to the board
     # Thread must not be locked
-    if not (request.user.has_perm('can_manage_boards') or post.user.id == request.user.id):
+    if not (request.user.has_perm('forum.can_manage_boards') or post.user.id == request.user.id):
         raise Http404
     if not thread.board.can_write(request.user):
         raise Http404
@@ -120,7 +120,7 @@ def edit_post(request, board_id, thread_id, post_id):
 
 
 @login_required
-@permission_required('can_manage_boards')
+@permission_required('forum.can_manage_boards')
 def toggle_sticky(request, board_id, thread_id):
     thread = get_object_or_404(ForumThread, pk=thread_id, board_id=board_id, deleted=False)
     thread.sticky = not thread.sticky
@@ -129,7 +129,7 @@ def toggle_sticky(request, board_id, thread_id):
 
 
 @login_required
-@permission_required('can_manage_boards')
+@permission_required('forum.can_manage_boards')
 def toggle_closed(request, board_id, thread_id):
     thread = get_object_or_404(ForumThread, pk=thread_id, board_id=board_id, deleted=False)
     thread.closed = not thread.closed
@@ -138,7 +138,7 @@ def toggle_closed(request, board_id, thread_id):
 
 
 @login_required
-@permission_required('can_manage_boards')
+@permission_required('forum.can_manage_boards')
 def delete_thread(request, board_id, thread_id):
     thread = get_object_or_404(ForumThread, pk=thread_id, board_id=board_id, deleted=False)
     thread.deleted = True
@@ -147,7 +147,7 @@ def delete_thread(request, board_id, thread_id):
 
 
 @login_required
-@permission_required('can_manage_boards')
+@permission_required('forum.can_manage_boards')
 def move_thread(request, board_id, thread_id):
     thread = get_object_or_404(ForumThread, pk=thread_id, board_id=board_id, deleted=False)
 

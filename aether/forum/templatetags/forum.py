@@ -5,7 +5,7 @@ register = template.Library()
 
 @register.filter
 def readable_by(items, user):
-    return (x for x in items if x.can_read(user))
+    return [x for x in items if x.can_read(user)]
 
 
 @register.filter

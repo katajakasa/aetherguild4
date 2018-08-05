@@ -12,6 +12,8 @@ from timezone_field import TimeZoneField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
+from aether.utils.permissions import has_perm_obj
+
 
 def utc_now():
     return arrow.utcnow().datetime
@@ -47,8 +49,11 @@ class ForumSection(Model):
         return self.boards.filter(deleted=False).order_by('sort_index')
 
     def can_read(self, user: User):
+        print(user.get_all_permissions())
         for board in self.boards.filter(deleted=False):
-            if board.read_perm is None or user.has_perm(board.read_perm):
+            if board.read_perm is None:
+                return True
+            if has_perm_obj(user, board.read_perm):
                 return True
         return False
 
@@ -75,14 +80,14 @@ class ForumBoard(Model):
     def can_read(self, user: User):
         if self.read_perm is None:
             return True
-        return user.has_perm(self.read_perm.codename)
+        return has_perm_obj(user, self.read_perm)
 
     def can_write(self, user: User):
         if not user.is_authenticated:
             return False
         if self.write_perm is None:
             return True
-        return user.has_perm(self.write_perm.codename)
+        return has_perm_obj(user, self.write_perm)
 
     @property
     def visible_threads(self):
