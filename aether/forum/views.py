@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from django.db.models import F
 from django.contrib.auth.decorators import login_required, permission_required
 from .models import ForumBoard, ForumSection, ForumThread, ForumLastRead, ForumPost
 from .forms import NewThreadForm, NewMessageForm, MoveThreadForm, EditMessageForm
@@ -51,9 +52,6 @@ def posts(request, board_id, thread_id):
     if not thread.board.can_read(request.user):
         raise Http404
 
-    if request.user.is_authenticated:
-        ForumLastRead.refresh_last_read(request.user, thread)
-
     if request.method == 'POST':
         if not request.user.is_authenticated:
             raise Http404
@@ -71,6 +69,13 @@ def posts(request, board_id, thread_id):
             ))
     else:
         form = NewMessageForm()
+
+    # Refresh last viewed values for this user/thread
+    if request.user.is_authenticated:
+        ForumLastRead.refresh_last_read(request.user, thread)
+
+    # Update the views counter atomically
+    ForumThread.objects.filter(pk=thread.pk).update(views=F('views')+1)
 
     show_count = request.user.profile.message_limit if request.user.is_authenticated else settings.FORUM_MESSAGE_LIMIT
     paginator = Paginator(thread.visible_posts, show_count)
