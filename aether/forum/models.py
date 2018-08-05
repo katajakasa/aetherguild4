@@ -49,7 +49,6 @@ class ForumSection(Model):
         return self.boards.filter(deleted=False).order_by('sort_index')
 
     def can_read(self, user: User):
-        print(user.get_all_permissions())
         for board in self.boards.filter(deleted=False):
             if board.read_perm is None:
                 return True
