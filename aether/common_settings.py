@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'imagekit',
     'crispy_forms',
     'precise_bbcode',
+    'cachalot',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'aether.utils.middleware.TimezoneMiddleware'
+    'aether.utils.middleware.TimezoneMiddleware',
 ]
 
 ROOT_URLCONF = 'aether.urls'
@@ -167,25 +168,26 @@ TIME_FORMAT = 'H:i'
 # Default sender for any emails we send outwards
 DEFAULT_FROM_EMAIL = 'no-reply@aetherguild.net'
 
+# Cache sessions
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-def make_cache_conf(debug_mode):
-    if debug_mode:
-        return {
-            'default': {
-                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-                'LOCATION': 'unique-snowflake'
-            }
+# Use Redis cache
+CACHES = {
+    'default': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/12",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
-    else:
-        return {
-            'default': {
-                "BACKEND": "django_redis.cache.RedisCache",
-                "LOCATION": "redis://127.0.0.1:6379/12",
-                "OPTIONS": {
-                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                }
-            }
-        }
+    },
+    'local': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Cachalot should save to local memory, it's faster
+CACHALOT_CACHE = 'local'
 
 
 def make_email_conf(debug_mode):

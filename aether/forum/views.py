@@ -11,7 +11,7 @@ from aether.utils.misc import get_page
 
 
 def boards(request):
-    sections = ForumSection.objects.filter(deleted=False).prefetch_related('boards').order_by('sort_index')
+    sections = ForumSection.objects.filter(deleted=False).order_by('sort_index')
     return render(request, 'forum/boards.html', {
         'sections': sections
     })
@@ -165,3 +165,9 @@ def move_thread(request, board_id, thread_id):
         form = MoveThreadForm()
 
     return render(request, 'forum/move_thread.html', {'form': form, 'thread': thread})
+
+
+@login_required
+def mark_all_read(request):
+    request.user.profile.mark_all_read(request.user)
+    return HttpResponseRedirect(reverse('forum:boards'))

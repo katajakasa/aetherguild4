@@ -6,13 +6,6 @@
 {% block content %}
     <h3>{{ thread.title }}</h3>
 
-    {% if can_manage %}
-        <div class="btn-group layout-control" role="group" aria-label="Management buttons">
-            <a href="{% url 'forum:move_thread' thread.board.id thread.id %}" type="button" class="btn btn-secondary">Move thread</a>
-            <a href="{% url 'forum:delete_thread' thread.board.id thread.id %}" type="button" class="btn btn-warning">Delete thread</a>
-        </div>
-    {% endif %}
-
     <div class="container layout-control">
     {% for post in posts %}
         <div class="row forum-post-row" id="{{ post.id }}">
@@ -52,6 +45,13 @@
     <div class="layout-control">
     {% include 'forum/fragments/pagination.html' with items=posts %}
     </div>
+
+    {% if can_manage %}
+        <div class="btn-group layout-control" role="group" aria-label="Management buttons">
+            <a href="{% url 'forum:move_thread' thread.board.id thread.id %}" type="button" class="btn btn-secondary">Move thread</a>
+            <a href="{% url 'forum:delete_thread' thread.board.id thread.id %}" type="button" class="btn btn-warning">Delete thread</a>
+        </div>
+    {% endif %}
 
     {% if not thread.closed and can_write %}
         <div class="layout-control">

@@ -28,6 +28,3 @@ DATABASES = {
 
 # Initialize email configuration
 EMAIL_BACKEND = make_email_conf(DEBUG)
-
-# Initialize cache configuration
-CACHES = make_cache_conf(DEBUG)

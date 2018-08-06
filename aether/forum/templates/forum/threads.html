@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
-{% load forum %}
-{% load crispy_forms_tags %}
+{% load forum cache crispy_forms_tags%}
 
 {% block title %}{{ board.title }} - Forum - {{ block.super }}{% endblock %}
 
@@ -43,10 +42,12 @@
                 </a>
                 {% endif %}
             </div>
+            {% cache 1800 thread_stats thread.id %}
             <div class="col-sm-1 text-center">
                 {{ thread.total_posts }}<br/>
                 <small class="text-muted">Posts</small>
             </div>
+            {% endcache %}
             <div class="col-sm-1 text-center">
                 {{ thread.views }}<br/>
                 <small class="text-muted">Views</small>

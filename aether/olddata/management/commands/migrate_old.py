@@ -48,6 +48,7 @@ class Command(BaseCommand):
             )
             forum_user = forum_models.ForumUser(
                 alias=old_user.alias,
+                last_all_read=make_utc(old_user.lastcontact)
             )
 
             # If old profile exists, fill data

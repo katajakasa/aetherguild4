@@ -4,6 +4,7 @@ import math
 from django.db.models import (Model, ForeignKey, DateTimeField, CharField, TextField, IntegerField, BooleanField,
                               Index, OneToOneField, PositiveIntegerField, ImageField, PROTECT, CASCADE)
 from django.contrib.auth.models import Permission, User
+from django.utils.functional import cached_property
 from django.conf import settings
 from django.db import IntegrityError
 
@@ -21,6 +22,7 @@ def utc_now():
 
 class ForumUser(Model):
     user = OneToOneField(User, on_delete=CASCADE, related_name='profile')
+    last_all_read = DateTimeField(default=utc_now, null=False)
     alias = CharField(max_length=32)
     signature = BBCodeTextField(null=False, blank=True, default='')
     timezone = TimeZoneField(default='Europe/Amsterdam', null=False)
@@ -31,6 +33,11 @@ class ForumUser(Model):
                                       processors=[ResizeToFill(150, 150)],
                                       format='PNG',
                                       options={'quality': 75})
+
+    def mark_all_read(self, user: User):
+        self.last_all_read = utc_now()
+        self.save(update_fields=['last_all_read'])
+        ForumLastRead.objects.filter(user=user).delete()
 
     def __str__(self):
         return self.user.username
@@ -90,7 +97,8 @@ class ForumBoard(Model):
 
     @property
     def visible_threads(self):
-        return self.threads.filter(deleted=False).order_by('-sticky', '-modified_at')
+        return self.threads.filter(deleted=False).prefetch_related('user', 'user__profile')\
+            .order_by('-sticky', '-modified_at')
 
     @property
     def total_posts(self):
@@ -100,9 +108,12 @@ class ForumBoard(Model):
     def total_threads(self):
         return self.threads.filter(deleted=False).count()
 
-    @property
+    @cached_property
     def last_post(self):
-        return ForumPost.objects.filter(thread__board=self.pk, deleted=False).order_by('-id').first()
+        return ForumPost.objects.filter(
+            thread__board=self.pk, thread__deleted=False, deleted=False)\
+            .prefetch_related('user', 'user__profile')\
+            .order_by('-id').first()
 
     class Meta:
         app_label = 'forum'
@@ -128,15 +139,17 @@ class ForumThread(Model):
 
     @property
     def visible_posts(self):
-        return self.posts.filter(deleted=False).order_by('id')
+        return self.posts.filter(deleted=False).prefetch_related('user', 'user__profile').order_by('id')
 
     @property
     def total_posts(self):
         return self.posts.filter(deleted=False).count()
 
-    @property
+    @cached_property
     def last_post(self):
-        return self.posts.filter(deleted=False).order_by('-id').first()
+        return self.posts.filter(deleted=False)\
+            .prefetch_related('user', 'user__profile')\
+            .order_by('-id').first()
 
     def has_new_content(self, user: User):
         try:
@@ -147,7 +160,7 @@ class ForumThread(Model):
 
     def set_modified(self):
         self.modified_at = utc_now()
-        self.save()
+        self.save(update_fields=['modified_at'])
 
     def get_last_read(self, user: User):
         try:
