@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from django.db import transaction, IntegrityError
+from django.db import transaction
 
 from aether.forum import models as forum_models
 from aether.olddata import models as old_models
