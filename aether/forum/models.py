@@ -71,9 +71,6 @@ class ForumSection(Model):
                 .values('pk')
             qs = qs.annotate(new_posts_count=SQCount(threads_sq))
 
-        for item in qs:
-            print(item.title, item.new_posts_count)
-
         return qs
 
     def can_read(self, user: User):
