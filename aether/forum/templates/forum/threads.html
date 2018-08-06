@@ -8,9 +8,15 @@
     <div class="container layout-control">
     {% for thread in threads %}
         <div class="row forum-thread-row">
-            <div class="col-sm-6">
+            <div class="col-sm-5">
                 <a href="{% url 'forum:posts' board.id thread.id %}">{{ thread.title }}</a><br/>
                 <small class="text-muted">by {{ thread.user.profile.alias }}</small>
+            </div>
+            <div class="col-sm-1 text-center">
+                {% if user.is_authenticated and thread.new_posts_count > 0 %}
+                    {{ thread.new_posts_count }}<br />
+                    <small class="text-info">New posts</small>
+                {% endif %}
             </div>
             <div class="col-sm-1 text-center">
                 {% if can_manage %}
@@ -42,19 +48,19 @@
                 </a>
                 {% endif %}
             </div>
-            {% cache 1800 thread_stats thread.id %}
             <div class="col-sm-1 text-center">
                 {{ thread.total_posts }}<br/>
                 <small class="text-muted">Posts</small>
             </div>
-            {% endcache %}
             <div class="col-sm-1 text-center">
                 {{ thread.views }}<br/>
                 <small class="text-muted">Views</small>
             </div>
-            <div class="col-sm-2 text-right">
-                <a href="{% url 'forum:posts' board.id thread.id %}?page={{ thread.last_post|page_for:user }}#{{ thread.last_post.id }}">{{ thread.last_post.created_at }}</a><br/>
-                <small class="text-muted">by {{ thread.last_post.user.profile.alias }}</small>
+            <div class="col-sm-2 text-right {% if user.is_authenticated and thread.new_posts_count > 0 %}prio-link{% endif %}">
+                <a href="{% url 'forum:posts' board.id thread.id %}?page={{ thread.last_post|page_for:user }}#{{ thread.last_post.id }}">
+                    {{ thread.last_post.created_at }}<br/>
+                    <small class="text-muted">by {{ thread.last_post.user.profile.alias }}</small>
+                </a>
             </div>
         </div>
     {% endfor %}

@@ -1,12 +1,13 @@
-import arrow
 import math
 
 from django.db.models import (Model, ForeignKey, DateTimeField, CharField, TextField, IntegerField, BooleanField,
-                              Index, OneToOneField, PositiveIntegerField, ImageField, PROTECT, CASCADE)
+                              Index, OneToOneField, PositiveIntegerField, ImageField, PROTECT, CASCADE, Subquery,
+                              OuterRef, Value)
 from django.contrib.auth.models import Permission, User
 from django.utils.functional import cached_property
 from django.conf import settings
 from django.db import IntegrityError
+
 
 from precise_bbcode.fields import BBCodeTextField
 from timezone_field import TimeZoneField
@@ -14,10 +15,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 
 from aether.utils.permissions import has_perm_obj
-
-
-def utc_now():
-    return arrow.utcnow().datetime
+from aether.utils.misc import utc_now, SQCount
 
 
 class ForumUser(Model):
@@ -51,9 +49,32 @@ class ForumSection(Model):
     def __str__(self):
         return self.title
 
-    @property
-    def visible_boards(self):
-        return self.boards.filter(deleted=False).order_by('sort_index')
+    def visible_boards(self, user: User = None):
+        qs = self.boards.filter(deleted=False).order_by('sort_index')
+
+        post_count_sq = ForumPost.objects.filter(
+            thread__board=OuterRef('pk'), thread__deleted=False, deleted=False).values('pk')
+        qs = qs.annotate(total_posts=SQCount(post_count_sq))
+
+        post_count_sq = ForumThread.objects.filter(
+            board=OuterRef('pk'), deleted=False).values('pk')
+        qs = qs.annotate(total_threads=SQCount(post_count_sq))
+
+        if user and user.is_authenticated:
+            limit_ts = user.profile.last_all_read
+            reads_sq = ForumLastRead.objects\
+                .filter(user=user, thread=OuterRef('pk'), created_at__gt=OuterRef('modified_at'))\
+                .values('thread')
+            threads_sq = ForumThread.objects\
+                .filter(board_id=OuterRef('pk'), deleted=False, modified_at__gt=limit_ts)\
+                .exclude(pk__in=Subquery(reads_sq))\
+                .values('pk')
+            qs = qs.annotate(new_posts_count=SQCount(threads_sq))
+
+        for item in qs:
+            print(item.title, item.new_posts_count)
+
+        return qs
 
     def can_read(self, user: User):
         for board in self.boards.filter(deleted=False):
@@ -95,25 +116,37 @@ class ForumBoard(Model):
             return True
         return has_perm_obj(user, self.write_perm)
 
-    @property
-    def visible_threads(self):
-        return self.threads.filter(deleted=False).prefetch_related('user', 'user__profile')\
+    def visible_threads(self, user: User = None):
+        qs = self.threads.filter(deleted=False)\
+            .select_related('user', 'user__profile')\
             .order_by('-sticky', '-modified_at')
 
-    @property
-    def total_posts(self):
-        return ForumPost.objects.filter(thread__board=self.pk, thread__deleted=False, deleted=False).count()
+        post_count_sq = ForumPost.objects\
+            .filter(thread=OuterRef('pk'), thread__deleted=False, deleted=False).values('pk')
+        qs = qs.annotate(total_posts=SQCount(post_count_sq))
 
-    @property
-    def total_threads(self):
-        return self.threads.filter(deleted=False).count()
+        if user and user.is_authenticated:
+            limit_ts = user.profile.last_all_read
+            reads_sq = ForumLastRead.objects\
+                .filter(user=user, thread=OuterRef('pk'), created_at__gt=OuterRef('modified_at'))\
+                .values('thread')
+            threads_sq = ForumThread.objects\
+                .filter(pk=OuterRef('pk'), deleted=False, modified_at__gt=limit_ts)\
+                .exclude(pk__in=Subquery(reads_sq))\
+                .values('pk')
+            qs = qs.annotate(new_posts_count=SQCount(threads_sq))
+
+        return qs
 
     @cached_property
     def last_post(self):
+        sq = ForumPost.objects.filter(thread__board=self.pk, deleted=False).values('pk')
         return ForumPost.objects.filter(
-            thread__board=self.pk, thread__deleted=False, deleted=False)\
-            .prefetch_related('user', 'user__profile')\
-            .order_by('-id').first()
+            thread__board=self.pk, deleted=False)\
+            .select_related('user', 'user__profile', 'thread')\
+            .annotate(post_count=SQCount(sq))\
+            .order_by('-id')\
+            .first()
 
     class Meta:
         app_label = 'forum'
@@ -139,16 +172,14 @@ class ForumThread(Model):
 
     @property
     def visible_posts(self):
-        return self.posts.filter(deleted=False).prefetch_related('user', 'user__profile').order_by('id')
-
-    @property
-    def total_posts(self):
-        return self.posts.filter(deleted=False).count()
+        return self.posts.filter(deleted=False).order_by('id')
 
     @cached_property
     def last_post(self):
+        sq = self.posts.filter(deleted=False).values('pk')
         return self.posts.filter(deleted=False)\
-            .prefetch_related('user', 'user__profile')\
+            .select_related('user', 'user__profile') \
+            .annotate(post_count=SQCount(sq)) \
             .order_by('-id').first()
 
     def has_new_content(self, user: User):
@@ -161,12 +192,6 @@ class ForumThread(Model):
     def set_modified(self):
         self.modified_at = utc_now()
         self.save(update_fields=['modified_at'])
-
-    def get_last_read(self, user: User):
-        try:
-            return self.last_reads.get(user=user).created_at
-        except ForumLastRead.DoesNotExist:
-            return None
 
     class Meta:
         app_label = 'forum'
@@ -194,9 +219,10 @@ class ForumPost(Model):
     def is_first(self):
         return self.thread.visible_posts.first().id == self.id
 
-    def page_for(self, user: User):
+    def page_for(self, user: User, count: int = None):
         show_count = user.profile.message_limit if user.is_authenticated else settings.FORUM_MESSAGE_LIMIT
-        count = self.thread.total_posts
+        if not count:
+            count = self.thread.posts.filter(deleted=False).count()
         return math.ceil(count / show_count)
 
     class Meta:

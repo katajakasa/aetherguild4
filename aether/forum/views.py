@@ -35,7 +35,7 @@ def threads(request, board_id):
         form = NewThreadForm()
 
     show_count = request.user.profile.thread_limit if request.user.is_authenticated else settings.FORUM_THREAD_LIMIT
-    paginator = Paginator(board.visible_threads, show_count)
+    paginator = Paginator(board.visible_threads(request.user), show_count)
     page = get_page(request)
 
     return render(request, 'forum/threads.html', {

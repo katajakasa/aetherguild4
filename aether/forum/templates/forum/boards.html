@@ -5,16 +5,21 @@
 {% block title %}Forum - {{ block.super }}{% endblock %}
 
 {% block content %}
-    {% for item in sections|readable_by:user %}
-        <h3>{{ item.title }}</h3>
+    {% for section in sections|sections_readable_by:user %}
+        <h3>{{ section.title }}</h3>
         <div class="container layout-control">
-        {% for board in item.visible_boards|readable_by:user %}
+        {% for board in section|boards_readable_by:user %}
             <div class="row forum-board-row">
-                <div class="col-sm-6">
+                <div class="col-sm-5">
                     <a href="{% url 'forum:threads' board.id %}">{{ board.title }}</a><br />
                     <small class="text-muted">{{ board.description }}</small>
                 </div>
-                {% cache 1800 board_stats board.id %}
+                <div class="col-sm-1 text-center">
+                    {% if user.is_authenticated and board.new_posts_count %}
+                        {{ board.new_posts_count }}<br />
+                        <small class="text-info">New posts</small>
+                    {% endif %}
+                </div>
                 <div class="col-sm-1 text-center">
                     {{ board.total_threads }}<br />
                     <small class="text-muted">Threads</small>
@@ -23,12 +28,11 @@
                     {{ board.total_posts }}<br />
                     <small class="text-muted">Posts</small>
                 </div>
-                {% endcache %}
-                <div class="col-sm-4 text-right">
+                <div class="col-sm-4 text-right {% if user.is_authenticated and board.new_posts_count %}prio-link{% endif %}">
                     <a href="{% url 'forum:posts' board.id board.last_post.thread.id %}?page={{ board.last_post|page_for:user }}#{{ board.last_post.id }}">
-                        {{ board.last_post.thread.title }}
-                    </a><br />
-                    <small class="text-muted">{{ board.last_post.user.profile.alias }}, {{ board.last_post.created_at }}</small>
+                        {{ board.last_post.thread.title }}<br />
+                        <small class="text-muted">{{ board.last_post.user.profile.alias }}, {{ board.last_post.created_at }}</small>
+                    </a>
                 </div>
             </div>
         {% endfor %}
