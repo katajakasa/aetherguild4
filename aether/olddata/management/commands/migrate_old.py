@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, IntegrityError
 
 from aether.forum import models as forum_models
 from aether.olddata import models as old_models
@@ -99,9 +99,13 @@ class Command(BaseCommand):
             forum_user.save()
 
             # Save to mapping
+            groups = set()
             for level, group in self.level_to_group_map.items():
                 if level <= old_user.level:
-                    group.user_set.add(user)
+                    groups.add(group)
+
+            for group in groups:
+                group.user_set.add(user)
 
             # Old to new user ID mapping
             self.user_mapping[old_user.id] = user.id
