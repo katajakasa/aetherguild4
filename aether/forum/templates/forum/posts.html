@@ -11,7 +11,7 @@
         <div class="row forum-post-row" id="{{ post.id }}">
             <div class="col-sm-2">
                 {{ post.user.profile.alias }}<br />
-                {% if post.user.profile.avatar %}
+                {% if post.user.profile.avatar_thumbnail %}
                     <img src="{{ post.user.profile.avatar_thumbnail.url }}" width="120" height="120" alt="Avatar">
                 {% endif %}
                 <small class="text-muted">Joined {{ post.user.date_joined }}</small><br />
