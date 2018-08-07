@@ -47,32 +47,8 @@ class ImageTag(BBCodeTag):
     class Options:
         replace_links = False
 
-    @staticmethod
-    def parse_youtube_video_id(value):
-        query = urlparse(value)
-        if query.scheme == '' and query.netloc == '':
-            return query.path
-        if query.hostname == 'youtu.be':
-            return query.path[1:]
-        if query.hostname in ('www.youtube.com', 'youtube.com'):
-            if query.path == '/watch':
-                p = parse_qs(query.query)
-                if not p.get('v'):
-                    return None
-                return p['v'][0]
-            if query.path[:7] == '/embed/':
-                return query.path.split('/')[2]
-            if query.path[:3] == '/v/':
-                return query.path.split('/')[2]
-        return None
-
     def render(self, value, option=None, parent=None):
-        code = self.parse_youtube_video_id(value)
-        return """
-        <div class="embed-responsive embed-responsive-16by9">
-            <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/{}?rel=0" allowfullscreen></iframe>
-        </div>
-        """.format(code)
+        return '<img src="{}" />'.format(value)
 
 
 class UlListTag(BBCodeTag):
