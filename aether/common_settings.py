@@ -189,6 +189,14 @@ CACHES = {
 # Cachalot should save to local memory, it's faster
 CACHALOT_CACHE = 'local'
 
+# Celery uses redis as broker
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/11'
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    'visibility_timeout': 3600,
+    'fanout_prefix': True,
+    'fanout_patterns': True
+}
+
 
 def make_email_conf(debug_mode):
     if debug_mode:

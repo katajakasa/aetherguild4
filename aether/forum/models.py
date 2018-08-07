@@ -3,7 +3,7 @@ import typing
 
 from django.db.models import (Model, ForeignKey, DateTimeField, CharField, TextField, IntegerField, BooleanField,
                               Index, OneToOneField, PositiveIntegerField, ImageField, PROTECT, CASCADE, Subquery,
-                              OuterRef, QuerySet)
+                              OuterRef, QuerySet, URLField)
 from django.contrib.auth.models import Permission, User
 from django.utils.functional import cached_property
 from django.conf import settings
@@ -13,7 +13,7 @@ from django.db import IntegrityError
 from precise_bbcode.fields import BBCodeTextField
 from timezone_field import TimeZoneField
 from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill
+from imagekit.processors import ResizeToFill, Thumbnail
 
 from aether.utils.permissions import has_perm_obj
 from aether.utils.misc import utc_now, SQCount
@@ -284,3 +284,24 @@ class ForumLastRead(Model):
         app_label = 'forum'
         unique_together = (('thread', 'user'),)
 
+
+class BBCodeImage(Model):
+    source_url = URLField(db_index=True, unique=True)
+    created_at = DateTimeField(default=utc_now, null=False)
+    original = ImageField(upload_to='bbcode', blank=True)
+    medium = ImageSpecField(source='original',
+                            processors=[Thumbnail(800, 800)],
+                            format='JPEG',
+                            options={'quality': 80})
+    small = ImageSpecField(source='original',
+                           processors=[Thumbnail(120, 120)],
+                           format='PNG',
+                           options={'quality': 80})
+
+    def __str__(self) -> str:
+        return str(self.source_url)
+
+    class Meta:
+        app_label = 'forum'
+        verbose_name = 'BBCode Image'
+        verbose_name_plural = 'BBCode Images'

@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from imagekit.admin import AdminThumbnail
 
-from .models import ForumUser, ForumSection, ForumBoard, ForumThread, ForumPost, ForumPostEdit, ForumLastRead
+from .models import (ForumUser, ForumSection, ForumBoard, ForumThread, ForumPost, ForumPostEdit, ForumLastRead,
+                     BBCodeImage)
 
 
 class ForumUserInline(admin.StackedInline):
@@ -10,10 +12,19 @@ class ForumUserInline(admin.StackedInline):
     can_delete = False
     verbose_name = 'profile'
     verbose_name_plural = 'profile'
+    admin_thumbnail = AdminThumbnail(image_field='avatar_thumbnail')
+    readonly_fields = ('admin_thumbnail', )
 
 
 class UserAdmin(BaseUserAdmin):
+    list_display = ('username', 'email', 'last_login', 'date_joined', 'is_staff')
     inlines = (ForumUserInline, )
+
+
+class BBCodeImageAdmin(admin.ModelAdmin):
+    list_display = ('source_url', 'created_at', 'admin_thumbnail')
+    admin_thumbnail = AdminThumbnail(image_field='small')
+    readonly_fields = ('admin_thumbnail', )
 
 
 class ForumSectionAdmin(admin.ModelAdmin):
@@ -56,6 +67,7 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 # Everything else
+admin.site.register(BBCodeImage, BBCodeImageAdmin)
 admin.site.register(ForumLastRead, ForumLastReadAdmin)
 admin.site.register(ForumPost, ForumPostAdmin)
 admin.site.register(ForumThread, ForumThreadAdmin)
