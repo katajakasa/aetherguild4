@@ -299,6 +299,7 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        """
         self.clear_target_db()
         self.create_groups()
         self.migrate_users()
@@ -309,3 +310,5 @@ class Command(BaseCommand):
         self.migrate_posts()
         self.migrate_post_edits()
         self.migrate_last_reads()
+        """
+        return
