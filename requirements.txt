@@ -14,6 +14,7 @@ argon2-cffi==18.1.0
 django-precise-bbcode==1.2.9
 pytz==2018.5
 celery==4.2.1
+requests==2.19.1
 
 # Temporary
 pymysql==0.9.2

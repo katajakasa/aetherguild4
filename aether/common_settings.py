@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'raven.contrib.django.raven_compat',
     'timezone_field',
     'imagekit',
@@ -150,6 +151,9 @@ LOGGING = {
         }
     },
     'loggers': {
+        'tasks': {
+            'level': 'INFO',
+        },
         'raven': {
             'level': 'WARNING',
             'handlers': ['console'],
@@ -160,7 +164,7 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
-        'Instanssi': {
+        '': {
             'handlers': ['console', 'sentry'],
             'level': 'INFO',
             'propagate': False,
@@ -173,6 +177,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = False
 USE_L10N = False
 USE_TZ = True
+
+# BBCode downloader limits
+BBCODE_CACHE_IMAGE_MAX_SIZE = 8 * 1024 * 1024  # 8M
+BBCODE_CACHE_IMAGE_FORMATS = ['png', 'jpeg', 'jpg', 'gif', 'webp']
 
 # Set european looking datetime formatting
 DATE_FORMAT = 'Y-m-d'
@@ -207,7 +215,7 @@ CELERY_BROKER_URL = 'redis://127.0.0.1:6379/11'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Europe/Amsterdam'
+CELERY_TIMEZONE = 'UTC'
 CELERY_RESULT_PERSISTENT = False
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'visibility_timeout': 3600,

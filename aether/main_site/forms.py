@@ -10,6 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from captcha.fields import ReCaptchaField
 
+from aether.forum import tasks
 from aether.forum.models import ForumUser
 
 
@@ -100,7 +101,9 @@ class ProfileForm(ModelForm):
         self.user.email = self.cleaned_data['email']
         self.user.save()
         timezone.activate(pytz.timezone(str(self.cleaned_data['timezone'])))
-        return super(ProfileForm, self).save(*args, **kwargs)
+        ret = super(ProfileForm, self).save(*args, **kwargs)
+        tasks.postprocess.apply_async(('forum', 'forumuser', ret.id), retry=False)
+        return ret
 
     class Meta:
         model = ForumUser
