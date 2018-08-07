@@ -4,6 +4,7 @@ from django.urls import reverse
 from .models import NewsItem
 from .forms import RegisterForm, ProfileForm
 from aether.utils.misc import get_page
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -35,6 +36,7 @@ def register(request):
     return render(request, 'main_site/register.html', {'register_form': form})
 
 
+@login_required
 def profile(request):
     if request.method == 'POST':
         profile_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
