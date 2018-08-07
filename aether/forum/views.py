@@ -5,11 +5,14 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.db.models import F
 from django.contrib.auth.decorators import login_required, permission_required
+from django.views.decorators.cache import never_cache
+
 from .models import ForumBoard, ForumSection, ForumThread, ForumLastRead, ForumPost
 from .forms import NewThreadForm, NewMessageForm, MoveThreadForm, EditMessageForm
 from aether.utils.misc import get_page
 
 
+@never_cache
 def boards(request):
     sections = ForumSection.objects.filter(deleted=False).order_by('sort_index')
     return render(request, 'forum/boards.html', {
@@ -17,6 +20,7 @@ def boards(request):
     })
 
 
+@never_cache
 def threads(request, board_id):
     board = get_object_or_404(ForumBoard, pk=board_id, deleted=False)
     if not board.can_read(request.user):
@@ -50,6 +54,7 @@ def threads(request, board_id):
     })
 
 
+@never_cache
 def posts(request, board_id, thread_id):
     thread = get_object_or_404(ForumThread, pk=thread_id, deleted=False)
     if not thread.board.can_read(request.user):
