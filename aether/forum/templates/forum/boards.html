@@ -29,9 +29,9 @@
                     <small class="text-muted">Posts</small>
                 </div>
                 <div class="col-sm-4 text-right {% if user.is_authenticated and board.new_posts_count %}prio-link{% endif %}">
-                    <a href="{% url 'forum:posts' board.id board.last_post.thread.id %}?page={{ board.last_post|page_for:user }}#{{ board.last_post.id }}">
-                        {{ board.last_post.thread.title }}<br />
-                        <small class="text-muted">{{ board.last_post.user.profile.alias }}, {{ board.last_post.created_at }}</small>
+                    <a href="{% url 'forum:posts' board.id board.latest_post.thread.id %}?page={{ board.latest_post|page_for:user }}#{{ board.latest_post.id }}">
+                        {{ board.latest_post.thread.title }}<br />
+                        <small class="text-muted">{{ board.latest_post.user.profile.alias }}, {{ board.latest_post.created_at }}</small>
                     </a>
                 </div>
             </div>

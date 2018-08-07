@@ -56,12 +56,14 @@
                 {{ thread.views }}<br/>
                 <small class="text-muted">Views</small>
             </div>
+            {% with latest=latest_posts|dict_get:thread.latest_post_id %}
             <div class="col-sm-2 text-right {% if user.is_authenticated and thread.new_posts_count > 0 %}prio-link{% endif %}">
-                <a href="{% url 'forum:posts' board.id thread.id %}?page={{ thread.last_post|page_for:user }}#{{ thread.last_post.id }}">
-                    {{ thread.last_post.created_at }}<br/>
-                    <small class="text-muted">by {{ thread.last_post.user.profile.alias }}</small>
+                <a href="{% url 'forum:posts' board.id thread.id %}?page={{ latest|page_for:user }}#{{ latest.id }}">
+                    {{ latest.created_at }}<br/>
+                    <small class="text-muted">by {{ latest.user.profile.alias }}</small>
                 </a>
             </div>
+            {% endwith %}
         </div>
     {% endfor %}
     </div>
