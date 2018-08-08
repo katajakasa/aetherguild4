@@ -31,9 +31,11 @@
                     {{ post.message.rendered }}
                 </div>
 
+                {% if post.has_edits %}
                 {% for edit in post.visible_edits %}
                     <small class="text-muted">Edited on {{ edit.created_at }} by {{ edit.editor }}: {{ edit.message }}</small><br />
                 {% endfor %}
+                {% endif %}
 
                 {% if post.user.profile.signature.rendered %}
                 <hr />

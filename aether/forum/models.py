@@ -3,7 +3,7 @@ import typing
 
 from django.db.models import (Model, ForeignKey, DateTimeField, CharField, TextField, IntegerField, BooleanField,
                               Index, OneToOneField, PositiveIntegerField, ImageField, PROTECT, CASCADE, Subquery,
-                              OuterRef, QuerySet, URLField)
+                              OuterRef, QuerySet, URLField, Exists)
 from django.contrib.auth.models import Permission, User
 from django.utils.functional import cached_property
 from django.conf import settings
@@ -51,7 +51,9 @@ class ForumSection(Model):
         return self.title
 
     def visible_boards(self, user: User = None) -> QuerySet:
-        qs = self.boards.filter(deleted=False).order_by('sort_index')
+        qs = self.boards.filter(deleted=False)\
+            .select_related('read_perm', 'read_perm__content_type', 'write_perm', 'write_perm__content_type')\
+            .order_by('sort_index')
 
         # Post count for all posts on the board
         post_count_sq = ForumPost.objects.filter(
@@ -188,7 +190,13 @@ class ForumThread(Model):
 
     @property
     def visible_posts(self) -> QuerySet:
-        return self.posts.filter(deleted=False).order_by('id')
+        qs = self.posts.filter(deleted=False).select_related('user', 'user__profile').order_by('id')
+
+        # Find out if post has edits
+        post_edit_sq = ForumPostEdit.objects.filter(post=OuterRef('pk')).values('pk')
+        qs = qs.annotate(has_edits=Exists(post_edit_sq))
+
+        return qs
 
     @cached_property
     def last_post(self) -> QuerySet:

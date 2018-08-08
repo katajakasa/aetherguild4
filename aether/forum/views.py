@@ -22,7 +22,12 @@ def boards(request):
 
 @never_cache
 def threads(request, board_id):
-    board = get_object_or_404(ForumBoard, pk=board_id, deleted=False)
+    try:
+        board = ForumBoard.objects\
+            .select_related('read_perm', 'read_perm__content_type', 'write_perm', 'write_perm__content_type')\
+            .get(pk=board_id, deleted=False)
+    except ForumBoard.DoesNotExist:
+        raise Http404
     if not board.can_read(request.user):
         raise Http404
 
@@ -56,7 +61,13 @@ def threads(request, board_id):
 
 @never_cache
 def posts(request, board_id, thread_id):
-    thread = get_object_or_404(ForumThread, pk=thread_id, deleted=False)
+    try:
+        thread = ForumThread.objects\
+            .select_related('board__read_perm', 'board__read_perm__content_type',
+                            'board__write_perm', 'board__write_perm__content_type')\
+            .get(pk=thread_id, deleted=False)
+    except ForumThread.DoesNotExist:
+        raise Http404
     if not thread.board.can_read(request.user):
         raise Http404
 
