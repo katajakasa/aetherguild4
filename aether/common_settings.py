@@ -179,15 +179,11 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
-    },
-    'local': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
     }
 }
 
 # Cachalot should save to local memory, it's faster
-CACHALOT_CACHE = 'local'
+CACHALOT_CACHE = 'default'
 
 # Celery uses redis as broker
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/11'
