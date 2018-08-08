@@ -48,7 +48,7 @@ class ImageTag(BBCodeTag):
         replace_links = False
 
     def render(self, value, option=None, parent=None):
-        return '<img src="{}" />'.format(value)
+        return '<a href="{url}" data-featherlight="image" class="fl-image"><img src="{url}" /></a>'.format(url=value)
 
 
 class UlListTag(BBCodeTag):
@@ -112,6 +112,7 @@ class QuoteTag(BBCodeTag):
                 </div>""".format(value)
 
 
+tag_pool.register_tag(ImageTag)
 tag_pool.register_tag(YoutubeTag)
 tag_pool.register_tag(OlListTag)
 tag_pool.register_tag(UlListTag)
