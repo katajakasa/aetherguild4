@@ -114,7 +114,7 @@ def edit_post(request, board_id, thread_id, post_id):
         raise Http404
 
     if request.method == 'POST':
-        form = EditMessageForm(request.POST, instance=post)
+        form = EditMessageForm(request.POST, instance=post, user=request.user)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect("{}?page={}#{}".format(
@@ -123,7 +123,7 @@ def edit_post(request, board_id, thread_id, post_id):
                 post.id
             ))
     else:
-        form = EditMessageForm(instance=post)
+        form = EditMessageForm(instance=post, user=request.user)
 
     return render(request, 'forum/edit_post.html', {
         'thread': thread,

@@ -63,6 +63,11 @@ h1,h2,h3,h4,h5 { margin-top: 0.5rem; }
     max-width: 800px;
 }
 
+.forum-post-message {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 .prio-link,
 .prio-link * {
     font-weight: bold !important;

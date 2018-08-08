@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
-from .models import ForumPost, ForumThread, ForumBoard
+from .models import ForumPost, ForumThread, ForumBoard, ForumPostEdit
 
 
 class NewThreadForm(Form):
@@ -67,8 +67,10 @@ class MoveThreadForm(ModelForm):
 
 class EditMessageForm(ModelForm):
     title = CharField(label=_("Thread title"), max_length=128, required=True)
+    edit_note = CharField(label=_("Edit note"), max_length=255, required=False)
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
         super(EditMessageForm, self).__init__(*args, **kwargs)
         if not self.instance.is_first:
             del self.fields['title']
@@ -84,8 +86,17 @@ class EditMessageForm(ModelForm):
             self.instance.thread.title = self.cleaned_data['title']
             if commit:
                 self.instance.thread.save()
-        return post
+
+        edit = ForumPostEdit(
+            post=post,
+            message=self.cleaned_data['edit_note'],
+            editor=self.user.profile.alias
+        )
+        if commit:
+            edit.save()
+
+        return post, edit
 
     class Meta:
         model = ForumPost
-        fields = ('message',)
+        fields = ('title', 'message', 'edit_note')
