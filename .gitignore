@@ -2,6 +2,8 @@
 venv
 .venv
 aether/settings.py
-content
+content/static/
+content/CACHE/
+content/media/
 *.pyc
 __pycache__
