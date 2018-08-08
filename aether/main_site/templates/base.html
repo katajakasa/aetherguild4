@@ -15,6 +15,7 @@
           crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'bootstrap4/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'sceditor/themes/custom.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'featherlight-1.7.6/featherlight.min.css' %}" />
     <link rel="stylesheet" href="{% static 'custom.css' %}">
     {% block head %}{% endblock %}
 </head>
@@ -73,6 +74,7 @@
     <script src="{% static 'jquery3/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'bootstrap4/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'sceditor/jquery.sceditor.bbcode.min.js' %}"></script>
+    <script src="{% static 'featherlight-1.7.6/featherlight.min.js' %}"></script>
     <script>
     $('.bbcode_field').sceditor({
         format: 'bbcode',
@@ -84,6 +86,7 @@
         height: '400px',
         toolbar: 'bold,italic,underline,strike|color,removeformat|cut,paste,pastetext|bulletlist,orderedlist|code,quote|image,link,unlink,youtube|date,time|print,maximize,source'
     });
+    $('.fl-image').featherlight();
 </script>
 </body>
 </html>
