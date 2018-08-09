@@ -6,6 +6,7 @@ django-redis==4.9.0
 django-crispy-forms==1.7.2
 django-cachalot==2.0.2
 django-silk==3.0.1
+django-recaptcha==1.4.0
 Pillow==5.2.0
 raven==6.9.0
 argon2-cffi==18.1.0

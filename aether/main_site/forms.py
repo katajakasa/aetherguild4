@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.forms import ModelForm, EmailField, CharField, ValidationError
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from captcha.fields import ReCaptchaField
 
 from aether.forum.models import ForumUser
 
@@ -40,6 +41,7 @@ class RegisterForm(UserCreationForm):
     alias = CharField(label=_("User alias"),
                       help_text=_("Username visible on the forums"),
                       max_length=32)
+    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)

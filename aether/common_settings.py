@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'precise_bbcode',
     'cachalot',
+    'captcha'
 ]
 
 MIDDLEWARE = [
@@ -170,6 +171,9 @@ DEFAULT_FROM_EMAIL = 'no-reply@aetherguild.net'
 
 # Cache sessions
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
+# Recaptcha for registration
+NOCAPTCHA = True
 
 # Use Redis cache
 CACHES = {
