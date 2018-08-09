@@ -39,10 +39,19 @@ PASSWORD_HASHERS = [
     'aether.utils.hashers.CustomSHA256PasswordHasher'
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
+}
+
 INSTALLED_APPS = [
     'aether.forum',
     'aether.main_site',
     'aether.olddata',
+    'aether.api',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,7 +64,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'precise_bbcode',
     'cachalot',
-    'captcha'
+    'captcha',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

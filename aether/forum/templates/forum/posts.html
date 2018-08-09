@@ -23,8 +23,9 @@
                 <small class="text-muted">
                     Posted: {{ post.created_at }}
                     {% if can_manage or post.user.id == user.id %}
-                        &middot; <a href="{% url 'forum:edit_post' thread.board.id thread.id post.id %}">Edit post</a>
+                        &middot; <a href="{% url 'forum:edit_post' thread.board.id thread.id post.id %}">Edit</a>
                     {% endif %}
+                    &middot; <a href="#post_form" class="quote-post-link" data-id="{{ post.id }}">Quote</a>
                 </small>
 
                 <div class="forum-post-message">
@@ -59,10 +60,18 @@
 
     {% if not thread.closed and can_write %}
         <div class="layout-control">
-        <form method="post" action="{% url 'forum:posts' thread.board.id thread.id %}">
+        <form method="post" id="post_form" action="{% url 'forum:posts' thread.board.id thread.id %}">
             {% crispy form form.helper %}
         </form>
         </div>
     {% endif %}
 {% endblock %}
 
+{% block jquery %}
+    {{ block.super }}
+    $(".quote-post-link").click(function(){
+        $.getJSON("/api/v1/posts/" + $(this).data('id'), function(data) {
+            $('.bbcode_field').sceditor('instance').insertText('[quote='+data.user.profile.alias+']\n'+data.message+'\n[/quote]');
+        });
+    });
+{% endblock %}

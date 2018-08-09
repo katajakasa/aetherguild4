@@ -76,17 +76,21 @@
     <script src="{% static 'sceditor/jquery.sceditor.bbcode.min.js' %}"></script>
     <script src="{% static 'featherlight-1.7.6/featherlight.min.js' %}"></script>
     <script>
-    $('.bbcode_field').sceditor({
-        format: 'bbcode',
-        style: '{% static 'sceditor/themes/content/custom.min.css' %}',
-        emoticonsEnabled: false,
-        autoUpdate: true,
-        bbcodeTrim: true,
-        width: '100%',
-        height: '400px',
-        toolbar: 'bold,italic,underline,strike|color,removeformat|cut,paste,pastetext|bulletlist,orderedlist|code,quote|image,link,unlink,youtube|date,time|print,maximize,source'
-    });
-    $('.fl-image').featherlight();
-</script>
+        $(document).ready(function() {
+            {% block jquery %}
+            $('.bbcode_field').sceditor({
+                format: 'bbcode',
+                style: '{% static 'sceditor/themes/content/custom.min.css' %}',
+                emoticonsEnabled: false,
+                autoUpdate: true,
+                bbcodeTrim: true,
+                width: '100%',
+                height: '400px',
+                toolbar: 'bold,italic,underline,strike|color,removeformat|cut,paste,pastetext|bulletlist,orderedlist|code,quote|image,link,unlink,youtube|date,time|print,maximize,source'
+            });
+            $('.fl-image').featherlight();
+            {% endblock %}
+        });
+    </script>
 </body>
 </html>
