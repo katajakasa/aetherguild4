@@ -27,6 +27,9 @@ RAVEN_CONFIG = {
     'dsn': '',
 }
 
+# Redirect to forum after login by default
+LOGIN_REDIRECT_URL = '/forum'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "aether/static"),
 ]
