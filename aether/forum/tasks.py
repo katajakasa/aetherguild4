@@ -8,7 +8,6 @@ from tempfile import NamedTemporaryFile
 import arrow
 from PIL import Image
 import requests
-from requests.exceptions import ConnectionError
 from celery import shared_task
 from django.conf import settings
 from django.core.files import File
@@ -17,7 +16,6 @@ from precise_bbcode.bbcode import get_parser
 
 from aether.forum.models import BBCodeImage, ForumPost, ForumUser
 from aether.main_site.models import NewsItem
-from aether.olddata.models import Bbcodethumbs as OldBbcodethumbs
 
 
 log = logging.getLogger('tasks')
@@ -124,39 +122,6 @@ def cache_bbcode_image(url):
     return True
 
 
-def try_old_cache(url):
-    # At this point, if image already exists in the current cache in any form, do NOT replace!
-    try:
-        BBCodeImage.objects.get(source_url=url)
-        return True
-    except BBCodeImage.DoesNotExist:
-        pass
-
-    # See if image exists in old image cache, and return false if it doesn't
-    try:
-        old_item = OldBbcodethumbs.objects.using('old').get(source_url=url)
-        log.info("Entry exists in old cache for %s.", url)
-    except OldBbcodethumbs.DoesNotExist:
-        log.info("No entry in old cache for %s.", url)
-        return False
-
-    p = parse.urlparse(old_item.source_url)
-    filename = os.path.join(settings.OLD_THUMBNAIL_DIR, '{}.jpg'.format(old_item.id))
-    with open(filename, 'rb') as fd:
-        item = BBCodeImage(
-            source_url=old_item.source_url,
-            created_at=arrow.get(old_item.date_added, 'Europe/Amsterdam').to('UTC').datetime,
-            original=File(fd, os.path.basename(p.path))
-        )
-        try:
-            item.save()
-        except IntegrityError:
-            return False
-
-        log.info("Copied from %s to %s.", filename, item.original.name)
-    return True
-
-
 @transaction.atomic
 def postprocess_bbcode_img(model, object_id, field_name):
     obj = model.objects.select_for_update().get(pk=object_id)
@@ -169,9 +134,6 @@ def postprocess_bbcode_img(model, object_id, field_name):
         for url in urls:
             if cache_bbcode_image(url):
                 refresh = True
-            elif try_old_cache(url):
-                refresh = True
-
         if refresh:
             # Re-render bbcode
             model.objects.filter(id=obj.id).update(**{

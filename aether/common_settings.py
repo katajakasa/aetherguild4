@@ -53,7 +53,6 @@ REST_FRAMEWORK = {
 INSTALLED_APPS = [
     'aether.forum',
     'aether.main_site',
-    'aether.olddata',
     'aether.api',
     'django.contrib.admin',
     'django.contrib.auth',
