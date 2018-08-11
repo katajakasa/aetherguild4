@@ -297,7 +297,7 @@ class BBCodeImage(Model):
     created_at = DateTimeField(default=utc_now, null=False)
     original = ImageField(upload_to='bbcode', null=False)
     medium = ImageSpecField(source='original',
-                            processors=[ResizeToFit(width=800, upscale=False)],
+                            processors=[ResizeToFit(width=480, upscale=False)],
                             format='JPEG',
                             options={'quality': 90})
     small = ImageSpecField(source='original',

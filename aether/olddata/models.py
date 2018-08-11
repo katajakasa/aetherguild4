@@ -141,3 +141,17 @@ class Users(models.Model):
     class Meta:
         managed = False
         db_table = 'users'
+
+
+class Bbcodethumbs(models.Model):
+    type = models.PositiveIntegerField()
+    source_url = models.CharField(unique=True, max_length=256)
+    date_added = models.DateTimeField()
+    date_last_use = models.DateTimeField()
+    width = models.PositiveIntegerField()
+    height = models.PositiveIntegerField()
+    filesize = models.PositiveIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'bbcodethumbs'

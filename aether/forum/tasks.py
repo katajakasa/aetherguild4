@@ -5,6 +5,7 @@ import re
 from urllib import parse
 from tempfile import NamedTemporaryFile
 
+import arrow
 from PIL import Image
 import requests
 from requests.exceptions import ConnectionError
@@ -16,6 +17,7 @@ from precise_bbcode.bbcode import get_parser
 
 from aether.forum.models import BBCodeImage, ForumPost, ForumUser
 from aether.main_site.models import NewsItem
+from aether.olddata.models import Bbcodethumbs as OldBbcodethumbs
 
 
 log = logging.getLogger('tasks')
@@ -90,29 +92,63 @@ def cache_bbcode_image(url):
         # Download with requests
         try:
             fetch_url_to_file(fd, url)
-        except (DownloadFailedException, ConnectionError):
-            log.exception("Unable to download source image", extra={'url': url})
+        except Exception as e:
+            log.error("Unable to download source image", extra={'url': url})
             return False
 
         # Verify with Pillow
         try:
             verify_image(fd)
-        except ImageVerificationException:
-            log.exception("Failed to verify image", extra={'url': url})
+        except ImageVerificationException as e:
+            log.error("Failed to verify image", extra={'url': url})
             return False
 
-        # That's that, write to django model + filesystem
+        # If this file already exists, overwrite it
         try:
+            entry = BBCodeImage.objects.get(source_url=url)
+            entry.original.delete()
+        except BBCodeImage.DoesNotExist:
             entry = BBCodeImage()
             entry.source_url = url
-            entry.original = File(fd, name=os.path.basename(p.path))
-            entry.save()
-        except IntegrityError as e:
-            log.exception("Image already exists with source_url {}".format(url), exc_info=e)
-            return False
+
+        entry.original = File(fd, name=os.path.basename(p.path))
+        entry.save()
 
     # Download part is done
     log.info("Downloaded to %s.", entry.original.name)
+    return True
+
+
+def try_old_cache(url):
+    # At this point, if image already exists in the current cache in any form, do NOT replace!
+    try:
+        BBCodeImage.objects.get(source_url=url)
+        return True
+    except BBCodeImage.DoesNotExist:
+        pass
+
+    # See if image exists in old image cache, and return false if it doesn't
+    try:
+        old_item = OldBbcodethumbs.objects.using('old').get(source_url=url)
+        log.info("Entry exists in old cache for %s.", url)
+    except OldBbcodethumbs.DoesNotExist:
+        log.info("No entry in old cache for %s.", url)
+        return False
+
+    p = parse.urlparse(old_item.source_url)
+    filename = os.path.join(settings.OLD_THUMBNAIL_DIR, '{}.jpg'.format(old_item.id))
+    with open(filename, 'rb') as fd:
+        item = BBCodeImage(
+            source_url=old_item.source_url,
+            created_at=arrow.get(old_item.date_added, 'Europe/Amsterdam').to('UTC').datetime,
+            original=File(fd, os.path.basename(p.path))
+        )
+        try:
+            item.save()
+        except IntegrityError as e:
+            return False
+
+        log.info("Copied from %s to %s.", filename, item.original.name)
     return True
 
 
@@ -126,20 +162,19 @@ def postprocess_bbcode_img(model, object_id, field_name):
         # Fetch urls to cache
         refresh = False
         for url in urls:
-            if BBCodeImage.objects.filter(source_url=url).exists():
-                log.info("Url %s already exists in database, skipping ...", url)
-                continue
             if cache_bbcode_image(url):
+                refresh = True
+            elif try_old_cache(url):
                 refresh = True
 
         if refresh:
             # Re-render bbcode
-            parser = get_parser()
-            text.rendered = parser.render(text.raw)
-            obj.save(update_fields=['_{}_rendered'.format(field_name)])
+            model.objects.filter(id=obj.id).update(**{
+                '_{}_rendered'.format(field_name): get_parser().render(text.raw)
+            })
 
 
-@shared_task
+@shared_task()
 def postprocess(object_type, object_id):
     log.info("Postprocessing object type {} with pk={}".format(object_type, object_id))
     if object_type == 'newsitem':

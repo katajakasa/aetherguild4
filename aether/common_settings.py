@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     'imagekit',
     'crispy_forms',
     'precise_bbcode',
-    'cachalot',
     'captcha',
     'rest_framework',
 ]
@@ -212,20 +211,23 @@ CACHES = {
     }
 }
 
-# Cachalot should save to local memory, it's faster
-CACHALOT_CACHE = 'default'
-
 # Celery uses redis as broker
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/11'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
 CELERY_RESULT_PERSISTENT = False
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'visibility_timeout': 3600,
+    'visibility_timeout': 3600 * 12,
     'fanout_prefix': True,
     'fanout_patterns': True
+}
+CELERY_TASK_PUBLISH_RETRY_POLICY = {
+    'max_retries': 3,
+    'interval_start': 300,
+    'interval_step': 300,
+    'interval_max': 3000,
 }
 
 
