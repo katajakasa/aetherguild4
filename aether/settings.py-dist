@@ -32,3 +32,6 @@ RECAPTCHA_PRIVATE_KEY = ''
 
 # Initialize email configuration
 EMAIL_BACKEND = make_email_conf(DEBUG)
+
+# Old thumbnail dir
+OLD_THUMBNAIL_DIR = '/tmp/backup/thumbnails'

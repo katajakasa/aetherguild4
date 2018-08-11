@@ -1,6 +1,185 @@
+import logging
+import os
+import io
+import re
+from urllib import parse
+from tempfile import NamedTemporaryFile
+
+import arrow
+from PIL import Image
+import requests
+from requests.exceptions import ConnectionError
 from celery import shared_task
+from django.conf import settings
+from django.core.files import File
+from django.db import IntegrityError, transaction
+from precise_bbcode.bbcode import get_parser
+
+from aether.forum.models import BBCodeImage, ForumPost, ForumUser
+from aether.main_site.models import NewsItem
+from aether.olddata.models import Bbcodethumbs as OldBbcodethumbs
 
 
-@shared_task
-def add(url):
+log = logging.getLogger('tasks')
+
+
+match_url = re.compile(r'\[img\](\s*)(.+?)(\s*)\[\/img\]')
+
+
+class DownloadFailedException(Exception):
     pass
+
+
+class ImageVerificationException(Exception):
+    pass
+
+
+def fetch_url_to_file(fd, url):
+    with requests.get(url, stream=True) as r:
+        # Make sure response code is okay
+        if r.status_code != requests.codes.ok:
+            raise DownloadFailedException("Unexpected response code {}".format(r.status_code))
+
+        # Make sure the reported MIME type is acceptable
+        if 'Content-Type' in r.headers:
+            image_type = r.headers['Content-Type']
+            log.info("Content type is %s", image_type)
+            if image_type not in settings.BBCODE_CACHE_IMAGE_MIME_TYPES:
+                raise DownloadFailedException("Image type {} is not acceptable".format(image_type))
+
+        # Make sure that the reported content length is smaller than maximum
+        if 'Content-Length' in r.headers:
+            image_size = int(r.headers['Content-Length'])
+            log.info("Content length is %d bytes", image_size)
+            if image_size > settings.BBCODE_CACHE_IMAGE_MAX_SIZE:
+                raise DownloadFailedException("Imagefile size exceeds maximum of {}".format(
+                    settings.BBCODE_CACHE_IMAGE_MAX_SIZE))
+
+        # Read data from remote host to a file, stop and fail if any problems
+        done = 0
+        for chunk in r.iter_content(chunk_size=4096):
+            done += len(chunk)
+            if done > settings.BBCODE_CACHE_IMAGE_MAX_SIZE:
+                raise DownloadFailedException("Imagefile size exceeds maximum of {}".format(
+                    settings.BBCODE_CACHE_IMAGE_MAX_SIZE))
+            fd.write(chunk)
+        fd.seek(0)
+
+
+def verify_image(fd):
+    try:
+        img = Image.open(io.BytesIO(fd.read()))
+        img.load()
+        img.close()
+        fd.seek(0)
+    except Image.DecompressionBombError as e:
+        raise ImageVerificationException("Decompression bomb detected!") from e
+    except Exception as e:
+        raise ImageVerificationException("Failed to open imagefile") from e
+
+
+def cache_bbcode_image(url):
+    log.info("Attempting to fetch {}".format(url))
+    p = parse.urlparse(url)
+
+    # Ensure that the url seems okay
+    if p.scheme not in ['http', 'https']:
+        log.error("Unknown scheme %s", p.scheme, extra={'url': url})
+        return False
+
+    # Read content to a file. Spool to memory until 2M, then write to disk.
+    with NamedTemporaryFile() as fd:
+        # Download with requests
+        try:
+            fetch_url_to_file(fd, url)
+        except Exception as e:
+            log.error("Unable to download source image", extra={'url': url})
+            return False
+
+        # Verify with Pillow
+        try:
+            verify_image(fd)
+        except ImageVerificationException as e:
+            log.error("Failed to verify image", extra={'url': url})
+            return False
+
+        # If this file already exists, overwrite it
+        try:
+            entry = BBCodeImage.objects.get(source_url=url)
+            entry.original.delete()
+        except BBCodeImage.DoesNotExist:
+            entry = BBCodeImage()
+            entry.source_url = url
+
+        entry.original = File(fd, name=os.path.basename(p.path))
+        entry.save()
+
+    # Download part is done
+    log.info("Downloaded to %s.", entry.original.name)
+    return True
+
+
+def try_old_cache(url):
+    # At this point, if image already exists in the current cache in any form, do NOT replace!
+    try:
+        BBCodeImage.objects.get(source_url=url)
+        return True
+    except BBCodeImage.DoesNotExist:
+        pass
+
+    # See if image exists in old image cache, and return false if it doesn't
+    try:
+        old_item = OldBbcodethumbs.objects.using('old').get(source_url=url)
+        log.info("Entry exists in old cache for %s.", url)
+    except OldBbcodethumbs.DoesNotExist:
+        log.info("No entry in old cache for %s.", url)
+        return False
+
+    p = parse.urlparse(old_item.source_url)
+    filename = os.path.join(settings.OLD_THUMBNAIL_DIR, '{}.jpg'.format(old_item.id))
+    with open(filename, 'rb') as fd:
+        item = BBCodeImage(
+            source_url=old_item.source_url,
+            created_at=arrow.get(old_item.date_added, 'Europe/Amsterdam').to('UTC').datetime,
+            original=File(fd, os.path.basename(p.path))
+        )
+        try:
+            item.save()
+        except IntegrityError as e:
+            return False
+
+        log.info("Copied from %s to %s.", filename, item.original.name)
+    return True
+
+
+@transaction.atomic
+def postprocess_bbcode_img(model, object_id, field_name):
+    obj = model.objects.select_for_update().get(pk=object_id)
+    text = getattr(obj, field_name)
+    hits = match_url.findall(text.raw)
+    urls = set([h[1] for h in hits])
+    if urls:
+        # Fetch urls to cache
+        refresh = False
+        for url in urls:
+            if cache_bbcode_image(url):
+                refresh = True
+            elif try_old_cache(url):
+                refresh = True
+
+        if refresh:
+            # Re-render bbcode
+            model.objects.filter(id=obj.id).update(**{
+                '_{}_rendered'.format(field_name): get_parser().render(text.raw)
+            })
+
+
+@shared_task()
+def postprocess(object_type, object_id):
+    log.info("Postprocessing object type {} with pk={}".format(object_type, object_id))
+    if object_type == 'newsitem':
+        postprocess_bbcode_img(NewsItem, object_id, 'message')
+    elif object_type == 'forumpost':
+        postprocess_bbcode_img(ForumPost, object_id, 'message')
+    elif object_type == 'forumuser':
+        postprocess_bbcode_img(ForumUser, object_id, 'signature')

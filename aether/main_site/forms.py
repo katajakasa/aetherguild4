@@ -100,7 +100,8 @@ class ProfileForm(ModelForm):
         self.user.email = self.cleaned_data['email']
         self.user.save()
         timezone.activate(pytz.timezone(str(self.cleaned_data['timezone'])))
-        return super(ProfileForm, self).save(*args, **kwargs)
+        ret = super(ProfileForm, self).save(*args, **kwargs)
+        return ret
 
     class Meta:
         model = ForumUser

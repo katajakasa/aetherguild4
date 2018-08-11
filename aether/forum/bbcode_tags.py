@@ -2,6 +2,8 @@ from precise_bbcode.tag_pool import tag_pool
 from precise_bbcode.bbcode.tag import BBCodeTag
 from urllib.parse import urlparse, parse_qs
 
+from aether.forum.models import BBCodeImage
+
 
 class YoutubeTag(BBCodeTag):
     name = 'youtube'
@@ -48,7 +50,12 @@ class ImageTag(BBCodeTag):
         replace_links = False
 
     def render(self, value, option=None, parent=None):
-        return '<a href="{url}" data-featherlight="image" class="fl-image"><img src="{url}" /></a>'.format(url=value)
+        url = value.strip()
+        entry = BBCodeImage.objects.filter(source_url=url).first()
+        medium_url = entry.medium.url if entry else url
+        original_url = entry.original.url if entry else url
+        return '<a href="{}" data-featherlight="image" class="fl-image"><img src="{}" /></a>'.format(
+            original_url, medium_url)
 
 
 class UlListTag(BBCodeTag):

@@ -9,11 +9,10 @@ from django.utils.functional import cached_property
 from django.conf import settings
 from django.db import IntegrityError
 
-
 from precise_bbcode.fields import BBCodeTextField
 from timezone_field import TimeZoneField
 from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill, Thumbnail
+from imagekit.processors import ResizeToFill, ResizeToFit
 
 from aether.utils.permissions import has_perm_obj
 from aether.utils.misc import utc_now, SQCount
@@ -30,8 +29,7 @@ class ForumUser(Model):
     avatar = ImageField(upload_to='avatars', blank=True)
     avatar_thumbnail = ImageSpecField(source='avatar',
                                       processors=[ResizeToFill(150, 150)],
-                                      format='PNG',
-                                      options={'quality': 75})
+                                      format='PNG')
 
     def mark_all_read(self, user: User) -> None:
         self.last_all_read = utc_now()
@@ -84,7 +82,8 @@ class ForumSection(Model):
 
         return qs
 
-    def get_latest_posts(self, ids: typing.List[int]) -> dict:
+    @staticmethod
+    def get_latest_posts(ids: typing.List[int]) -> dict:
         sq = ForumPost.objects.filter(thread__board=OuterRef('thread__board'), deleted=False).values('pk')
         qs = ForumPost.objects.filter(pk__in=ids)\
             .select_related('user', 'user__profile', 'thread')\
@@ -294,17 +293,16 @@ class ForumLastRead(Model):
 
 
 class BBCodeImage(Model):
-    source_url = URLField(db_index=True, unique=True)
+    source_url = URLField(db_index=True, unique=True, null=False)
     created_at = DateTimeField(default=utc_now, null=False)
-    original = ImageField(upload_to='bbcode', blank=True)
+    original = ImageField(upload_to='bbcode', null=False)
     medium = ImageSpecField(source='original',
-                            processors=[Thumbnail(800, 800)],
+                            processors=[ResizeToFit(width=480, upscale=False)],
                             format='JPEG',
-                            options={'quality': 80})
+                            options={'quality': 90})
     small = ImageSpecField(source='original',
-                           processors=[Thumbnail(120, 120)],
-                           format='PNG',
-                           options={'quality': 80})
+                           processors=[ResizeToFit(width=120, height=120, upscale=True)],
+                           format='PNG')
 
     def __str__(self) -> str:
         return str(self.source_url)
