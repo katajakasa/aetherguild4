@@ -1,6 +1,7 @@
 import logging
 import os
 import io
+import re
 from urllib import parse
 from tempfile import NamedTemporaryFile
 
@@ -10,13 +11,17 @@ from requests.exceptions import ConnectionError
 from celery import shared_task
 from django.conf import settings
 from django.core.files import File
-from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError, transaction
+from precise_bbcode.bbcode import get_parser
 
 from aether.forum.models import BBCodeImage, ForumPost, ForumUser
 from aether.main_site.models import NewsItem
 
 
 log = logging.getLogger('tasks')
+
+
+match_url = re.compile(r'\[img\](\s*)(.+?)(\s*)\[\/img\]')
 
 
 class DownloadFailedException(Exception):
@@ -31,11 +36,19 @@ def fetch_url_to_file(fd, url):
     with requests.get(url, stream=True) as r:
         # Make sure response code is okay
         if r.status_code != requests.codes.ok:
-            raise DownloadFailedException("Unexpected response code %d", r.status_code)
+            raise DownloadFailedException("Unexpected response code {}".format(r.status_code))
+
+        # Make sure the reported MIME type is acceptable
+        if 'Content-Type' in r.headers:
+            image_type = r.headers['Content-Type']
+            log.info("Content type is %s", image_type)
+            if image_type not in settings.BBCODE_CACHE_IMAGE_MIME_TYPES:
+                raise DownloadFailedException("Image type {} is not acceptable".format(image_type))
 
         # Make sure that the reported content length is smaller than maximum
-        if 'content-length' in r.headers:
-            image_size = int(r.headers['content-length'])
+        if 'Content-Length' in r.headers:
+            image_size = int(r.headers['Content-Length'])
+            log.info("Content length is %d bytes", image_size)
             if image_size > settings.BBCODE_CACHE_IMAGE_MAX_SIZE:
                 raise DownloadFailedException("Imagefile size exceeds maximum of {}".format(
                     settings.BBCODE_CACHE_IMAGE_MAX_SIZE))
@@ -63,7 +76,6 @@ def verify_image(fd):
         raise ImageVerificationException("Failed to open imagefile") from e
 
 
-@shared_task
 def cache_bbcode_image(url):
     log.info("Attempting to fetch {}".format(url))
     p = parse.urlparse(url)
@@ -71,13 +83,7 @@ def cache_bbcode_image(url):
     # Ensure that the url seems okay
     if p.scheme not in ['http', 'https']:
         log.error("Unknown scheme %s", p.scheme, extra={'url': url})
-        return
-
-    # Make sure the file extension is supported
-    ext = os.path.splitext(p.path)[1][1:]
-    if ext not in settings.BBCODE_CACHE_IMAGE_FORMATS:
-        log.error("Unknown file extension: %s", ext, extra={'url': url})
-        return
+        return False
 
     # Read content to a file. Spool to memory until 2M, then write to disk.
     with NamedTemporaryFile() as fd:
@@ -86,26 +92,59 @@ def cache_bbcode_image(url):
             fetch_url_to_file(fd, url)
         except (DownloadFailedException, ConnectionError):
             log.exception("Unable to download source image", extra={'url': url})
-            return
+            return False
 
         # Verify with Pillow
         try:
             verify_image(fd)
         except ImageVerificationException:
             log.exception("Failed to verify image", extra={'url': url})
-            return
+            return False
 
         # That's that, write to django model + filesystem
-        entry = BBCodeImage()
-        entry.source_url = url
-        entry.original = File(fd, name=os.path.basename(p.path))
-        entry.save()
+        try:
+            entry = BBCodeImage()
+            entry.source_url = url
+            entry.original = File(fd, name=os.path.basename(p.path))
+            entry.save()
+        except IntegrityError as e:
+            log.exception("Image already exists with source_url {}".format(url), exc_info=e)
+            return False
 
-        # Download part is done
-        log.info("Downloaded to %s.", entry.original.name)
+    # Download part is done
+    log.info("Downloaded to %s.", entry.original.name)
+    return True
+
+
+@transaction.atomic
+def postprocess_bbcode_img(model, object_id, field_name):
+    obj = model.objects.select_for_update().get(pk=object_id)
+    text = getattr(obj, field_name)
+    hits = match_url.findall(text.raw)
+    urls = set([h[1] for h in hits])
+    if urls:
+        # Fetch urls to cache
+        refresh = False
+        for url in urls:
+            if BBCodeImage.objects.filter(source_url=url).exists():
+                log.info("Url %s already exists in database, skipping ...", url)
+                continue
+            if cache_bbcode_image(url):
+                refresh = True
+
+        if refresh:
+            # Re-render bbcode
+            parser = get_parser()
+            text.rendered = parser.render(text.raw)
+            obj.save(update_fields=['_{}_rendered'.format(field_name)])
 
 
 @shared_task
-def postprocess(app, model, id):
-    content_type = ContentType.objects.get(app_label=app, model=model)
-    log.info(content_type)
+def postprocess(object_type, object_id):
+    log.info("Postprocessing object type {} with pk={}".format(object_type, object_id))
+    if object_type == 'newsitem':
+        postprocess_bbcode_img(NewsItem, object_id, 'message')
+    elif object_type == 'forumpost':
+        postprocess_bbcode_img(ForumPost, object_id, 'message')
+    elif object_type == 'forumuser':
+        postprocess_bbcode_img(ForumUser, object_id, 'signature')

@@ -180,7 +180,12 @@ USE_TZ = True
 
 # BBCode downloader limits
 BBCODE_CACHE_IMAGE_MAX_SIZE = 8 * 1024 * 1024  # 8M
-BBCODE_CACHE_IMAGE_FORMATS = ['png', 'jpeg', 'jpg', 'gif', 'webp']
+BBCODE_CACHE_IMAGE_MIME_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+]
 
 # Set european looking datetime formatting
 DATE_FORMAT = 'Y-m-d'
