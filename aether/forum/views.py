@@ -46,8 +46,8 @@ def threads(request, board_id):
     show_count = request.user.profile.thread_limit if request.user.is_authenticated else settings.FORUM_THREAD_LIMIT
     paginator = Paginator(board.visible_threads(request.user), show_count)
     page = get_page(request)
-    thread_list = list(paginator.get_page(page))
-    latest_posts = board.get_latest_posts([x.latest_post_id for x in thread_list])
+    thread_list = paginator.get_page(page)
+    latest_posts = board.get_latest_posts([x.latest_post_id for x in list(thread_list)])
 
     return render(request, 'forum/threads.html', {
         'board': board,
