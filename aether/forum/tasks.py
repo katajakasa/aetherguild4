@@ -93,14 +93,14 @@ def cache_bbcode_image(url):
         try:
             fetch_url_to_file(fd, url)
         except Exception as e:
-            log.error("Unable to download source image", extra={'url': url})
+            log.error("Unable to download source image", extra={'url': url}, exc_info=e)
             return False
 
         # Verify with Pillow
         try:
             verify_image(fd)
-        except ImageVerificationException as e:
-            log.error("Failed to verify image", extra={'url': url})
+        except Exception as e:
+            log.error("Failed to verify image", extra={'url': url}, exc_info=e)
             return False
 
         # If this file already exists, overwrite it
@@ -112,7 +112,12 @@ def cache_bbcode_image(url):
             entry.source_url = url
 
         entry.original = File(fd, name=os.path.basename(p.path))
-        entry.save()
+
+        try:
+            entry.save()
+        except IntegrityError:
+            log.warning("Source url has already been downloaded. Concurrency issue ?")
+            return False
 
     # Download part is done
     log.info("Downloaded to %s.", entry.original.name)
@@ -145,7 +150,7 @@ def try_old_cache(url):
         )
         try:
             item.save()
-        except IntegrityError as e:
+        except IntegrityError:
             return False
 
         log.info("Copied from %s to %s.", filename, item.original.name)
