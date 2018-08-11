@@ -113,6 +113,7 @@ def posts(request, board_id, thread_id):
 def edit_post(request, board_id, thread_id, post_id):
     post = get_object_or_404(ForumPost, pk=post_id, thread_id=thread_id, deleted=False)
     thread = post.thread
+    page = request.GET.get('page', '1')
 
     # User must be either admin or owner of the post
     # User must have write rights to the board
@@ -129,17 +130,15 @@ def edit_post(request, board_id, thread_id, post_id):
         if form.is_valid():
             form.save()
             return HttpResponseRedirect("{}?page={}#{}".format(
-                reverse('forum:posts', args=(thread.board.id, thread.id)),
-                post.page_for(request.user),
-                post.id
-            ))
+                reverse('forum:posts', args=(thread.board.id, thread.id)), page, post.id))
     else:
         form = EditMessageForm(instance=post, user=request.user)
 
     return render(request, 'forum/edit_post.html', {
         'thread': thread,
         'post': post,
-        'form': form
+        'form': form,
+        'page': page
     })
 
 
