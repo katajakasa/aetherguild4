@@ -122,8 +122,6 @@ def edit_post(request, board_id, thread_id, post_id):
         raise Http404
     if not thread.board.can_write(request.user):
         raise Http404
-    if thread.closed:
-        raise Http404
 
     if request.method == 'POST':
         form = EditMessageForm(request.POST, instance=post, user=request.user)
