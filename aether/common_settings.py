@@ -210,8 +210,18 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
+    },
+    'imagekit': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/13",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
     }
 }
+
+# Cache backend for imagekit
+IMAGEKIT_CACHE_BACKEND = 'imagekit'
 
 # Celery uses redis as broker
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/11'
