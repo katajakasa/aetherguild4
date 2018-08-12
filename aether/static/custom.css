@@ -81,7 +81,7 @@ h1,h2,h3,h4,h5 { margin-top: 0.5rem; }
 
 .forum-post-row img,
 .news_item img {
-    max-width: 800px;
+    max-width: 480px;
 }
 
 .forum-post-message {
