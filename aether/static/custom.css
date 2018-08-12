@@ -51,6 +51,27 @@ h1,h2,h3,h4,h5 { margin-top: 0.5rem; }
 .news_item:last-child { border-bottom: 0; padding-bottom: 0; }
 .news_item:first-child { padding-top: 0; }
 
+/* GALLERY */
+
+.gallery-image-frame {
+    display: inline-block;
+    width: 200px;
+    max-height: 200px;
+    margin: 0.5em;
+}
+
+.gallery-image-frame img {
+    display: block;
+}
+
+.gallery-image-frame figcaption {
+    background-color: #0d161f;
+    padding: 0 4px 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* FORUM */
 
 .forum-board-row, .forum-thread-row, .forum-post-row {

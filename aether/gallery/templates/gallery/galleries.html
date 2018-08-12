@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Gallery - {{ block.super }}{% endblock %}
+
+{% block content %}
+    {% if galleries %}
+    {% for gallery in galleries %}
+        <h3>{{ gallery.name }}</h3>
+        <div class="layout-control">
+            <p>{{ gallery.description }}
+        </div>
+        <div class="layout-control">
+            {% for image in gallery.sorted_images %}
+                <figure class="gallery-image-frame">
+                    <a href="{{ image.original.url }}" data-featherlight="image" class="fl-image">
+                        <img src="{{ image.thumbnail.url }}" />
+                    </a>
+                    <figcaption><small>{{ image.name }}</small></figcaption>
+                </figure>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <div class="layout-control">
+    {% include 'forum/fragments/pagination.html' with items=galleries %}
+    </div>
+    {% else %}
+    <p>No galleries (yet)</p>
+    {% endif %}
+{% endblock %}
+

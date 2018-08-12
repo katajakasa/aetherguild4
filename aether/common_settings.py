@@ -24,6 +24,10 @@ RAVEN_CONFIG = {
     'dsn': '',
 }
 
+# Upload limits
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
+FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
+
 # Redirect to forum after login by default
 LOGIN_REDIRECT_URL = '/forum'
 
@@ -51,6 +55,7 @@ INSTALLED_APPS = [
     'aether.forum',
     'aether.main_site',
     'aether.api',
+    'aether.gallery',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
