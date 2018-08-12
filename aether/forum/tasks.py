@@ -34,7 +34,6 @@ class ImageVerificationException(Exception):
 
 
 def fetch_url_to_file(fd, url):
-    content_type = None
     with requests.get(url, stream=True) as r:
         # Make sure response code is okay
         if r.status_code != requests.codes.ok:
@@ -65,15 +64,22 @@ def fetch_url_to_file(fd, url):
             fd.write(chunk)
         fd.seek(0)
 
-    return content_type, mimetypes.guess_extension(content_type)
+
+def guess_image_extension(img):
+    ext = mimetypes.guess_extension(Image.MIME[img.format])
+    if ext == '.jpe':
+        ext = '.jpg'
+    return ext
 
 
 def verify_image(fd):
     try:
         img = Image.open(io.BytesIO(fd.read()))
         img.load()
+        ext = guess_image_extension(img)
         img.close()
         fd.seek(0)
+        return ext
     except Image.DecompressionBombError as e:
         raise ImageVerificationException("Decompression bomb detected!") from e
     except Exception as e:
@@ -93,14 +99,14 @@ def cache_bbcode_image(url):
     with NamedTemporaryFile() as fd:
         # Download with requests
         try:
-            _, ext = fetch_url_to_file(fd, url)
+            fetch_url_to_file(fd, url)
         except Exception as e:
             log.exception("Unable to download source image", extra={'url': url}, exc_info=e)
             return False
 
         # Verify with Pillow
         try:
-            verify_image(fd)
+            ext = verify_image(fd)
         except Exception as e:
             log.exception("Failed to verify image", extra={'url': url}, exc_info=e)
             return False
