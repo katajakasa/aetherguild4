@@ -2,16 +2,17 @@ import logging
 import os
 import io
 import re
+import mimetypes
 from urllib import parse
 from tempfile import NamedTemporaryFile
 
-import arrow
 from PIL import Image
 import requests
 from celery import shared_task
 from django.conf import settings
 from django.core.files import File
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 from precise_bbcode.bbcode import get_parser
 
 from aether.forum.models import BBCodeImage, ForumPost, ForumUser
@@ -20,7 +21,7 @@ from aether.main_site.models import NewsItem
 
 log = logging.getLogger('tasks')
 
-
+mimetypes.init()
 match_url = re.compile(r'\[img\](\s*)(.+?)(\s*)\[\/img\]')
 
 
@@ -33,6 +34,7 @@ class ImageVerificationException(Exception):
 
 
 def fetch_url_to_file(fd, url):
+    content_type = None
     with requests.get(url, stream=True) as r:
         # Make sure response code is okay
         if r.status_code != requests.codes.ok:
@@ -40,10 +42,10 @@ def fetch_url_to_file(fd, url):
 
         # Make sure the reported MIME type is acceptable
         if 'Content-Type' in r.headers:
-            image_type = r.headers['Content-Type']
-            log.info("Content type is %s", image_type)
-            if image_type not in settings.BBCODE_CACHE_IMAGE_MIME_TYPES:
-                raise DownloadFailedException("Image type {} is not acceptable".format(image_type))
+            content_type = r.headers['Content-Type']
+            log.info("Content type is %s", content_type)
+            if content_type not in settings.BBCODE_CACHE_IMAGE_MIME_TYPES:
+                raise DownloadFailedException("Image type {} is not acceptable".format(content_type))
 
         # Make sure that the reported content length is smaller than maximum
         if 'Content-Length' in r.headers:
@@ -62,6 +64,8 @@ def fetch_url_to_file(fd, url):
                     settings.BBCODE_CACHE_IMAGE_MAX_SIZE))
             fd.write(chunk)
         fd.seek(0)
+
+    return content_type, mimetypes.guess_extension(content_type)
 
 
 def verify_image(fd):
@@ -89,7 +93,7 @@ def cache_bbcode_image(url):
     with NamedTemporaryFile() as fd:
         # Download with requests
         try:
-            fetch_url_to_file(fd, url)
+            _, ext = fetch_url_to_file(fd, url)
         except Exception as e:
             log.exception("Unable to download source image", extra={'url': url}, exc_info=e)
             return False
@@ -109,9 +113,17 @@ def cache_bbcode_image(url):
             entry = BBCodeImage()
             entry.source_url = url
 
-        new_image = File(fd)
-        entry.original.save(os.path.basename(p.path), new_image, save=True)
+        # Add extension if one does not exist already
+        name = os.path.basename(p.path)
+        if name == '':
+            name = f'{timezone.now():%Y-%m-%d_%H-%M-%S}'
+        if os.path.splitext(name)[1] == '' and ext:
+            name = f"{name}{ext}"
 
+        # Add produced file
+        entry.original.save(name, File(fd, name), save=False)
+
+        # ... and then save everything
         try:
             entry.save()
         except IntegrityError:
