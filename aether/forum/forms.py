@@ -76,6 +76,11 @@ class EditMessageForm(ModelForm):
             del self.fields['title']
         else:
             self.fields['title'].initial = self.instance.thread.title
+
+        # Only allow attaching galleries for staff
+        if not self.user.is_staff:
+            del self.fields['attached_gallery']
+
         self.fields['message'].widget.attrs['class'] = 'bbcode_field'
         self.helper = FormHelper()
         self.helper.add_input(Submit('submit', _('Post')))
@@ -99,4 +104,4 @@ class EditMessageForm(ModelForm):
 
     class Meta:
         model = ForumPost
-        fields = ('title', 'message', 'edit_note')
+        fields = ('title', 'message', 'edit_note', 'attached_gallery')

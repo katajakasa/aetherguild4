@@ -38,6 +38,19 @@
                 {% endfor %}
                 {% endif %}
 
+                {% if post.attached_gallery %}
+                <hr />
+                <small class="text-muted">Attached gallery: {{ post.attached_gallery.name }}</small><br />
+                {% for image in post.attached_gallery.sorted_images %}
+                    <figure class="gallery-image-frame">
+                        <a href="{{ image.original.url }}" data-featherlight="image" class="fl-image">
+                            <img src="{{ image.thumbnail.url }}" />
+                        </a>
+                        <figcaption><small>{{ image.name }}</small></figcaption>
+                    </figure>
+                {% endfor %}
+                {% endif %}
+
                 {% if post.user.profile.signature.rendered %}
                 <hr />
                 <small class="text-muted">{{ post.user.profile.signature.rendered }}</small>

@@ -3,7 +3,7 @@ import typing
 
 from django.db.models import (Model, ForeignKey, DateTimeField, CharField, TextField, IntegerField, BooleanField,
                               Index, OneToOneField, PositiveIntegerField, ImageField, PROTECT, CASCADE, Subquery,
-                              OuterRef, QuerySet, URLField, Exists)
+                              OuterRef, QuerySet, URLField, Exists, SET_NULL)
 from django.contrib.auth.models import Permission, User
 from django.utils.functional import cached_property
 from django.conf import settings
@@ -16,6 +16,7 @@ from imagekit.processors import ResizeToFill, ResizeToFit
 
 from aether.utils.permissions import has_perm_obj
 from aether.utils.misc import utc_now, SQCount
+from aether.gallery.models import GalleryGroup
 
 
 class ForumUser(Model):
@@ -230,6 +231,7 @@ class ForumPost(Model):
     message = BBCodeTextField(null=False, blank=False)
     created_at = DateTimeField(default=utc_now, null=False)
     deleted = BooleanField(default=False, null=False)
+    attached_gallery = ForeignKey(GalleryGroup, on_delete=SET_NULL, null=True, default=None, related_name='linked_posts')
 
     def __str__(self) -> str:
         return str(self.id)
