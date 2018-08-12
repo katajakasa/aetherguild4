@@ -1,4 +1,4 @@
-django==2.0.8
+django==2.1
 psycopg2-binary==2.7.5
 arrow==0.12.1
 django-imagekit==4.0.2
@@ -6,6 +6,7 @@ django-redis==4.9.0
 django-crispy-forms==1.7.2
 django-silk==3.0.1
 django-recaptcha==1.4.0
+django-timezone-field==3.0rc1
 djangorestframework==3.8.2
 Pillow==5.2.0
 raven==6.9.0
@@ -14,6 +15,3 @@ django-precise-bbcode==1.2.9
 pytz==2018.5
 celery==4.2.1
 requests==2.19.1
-
-# django-timezone-field, since 3.0 is not yet in pypi
-https://github.com/mfogel/django-timezone-field/archive/3.0rc1.tar.gz

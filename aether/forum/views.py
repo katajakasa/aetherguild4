@@ -117,7 +117,6 @@ def edit_post(request, board_id, thread_id, post_id):
 
     # User must be either admin or owner of the post
     # User must have write rights to the board
-    # Thread must not be locked
     if not (request.user.has_perm('forum.can_manage_boards') or post.user.id == request.user.id):
         raise Http404
     if not thread.board.can_write(request.user):
