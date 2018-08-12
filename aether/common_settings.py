@@ -11,9 +11,6 @@ STATIC_URL = '/static/'
 # Secret key, should be filled with random
 SECRET_KEY = ''
 
-# Salt for old passwords (for migrations)
-OLD_PW_SALT = ""
-
 DEBUG = False
 ALLOWED_HOSTS = []
 
