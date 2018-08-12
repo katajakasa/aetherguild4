@@ -25,6 +25,7 @@ class BBCodeImageAdmin(admin.ModelAdmin):
     list_display = ('source_url', 'created_at', 'admin_thumbnail')
     admin_thumbnail = AdminThumbnail(image_field='small')
     readonly_fields = ('admin_thumbnail', )
+    search_fields = ('source_url',)
 
 
 class ForumSectionAdmin(admin.ModelAdmin):
