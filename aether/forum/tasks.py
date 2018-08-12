@@ -62,6 +62,7 @@ def fetch_url_to_file(fd, url):
                 raise DownloadFailedException("Imagefile size exceeds maximum of {}".format(
                     settings.BBCODE_CACHE_IMAGE_MAX_SIZE))
             fd.write(chunk)
+        fd.flush()
         fd.seek(0)
 
 
