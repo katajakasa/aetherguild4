@@ -7,6 +7,8 @@ django-crispy-forms==1.7.2
 django-silk==3.0.1
 django-recaptcha==1.4.0
 django-timezone-field==3.0rc1
+django-csp==3.4
+django-csp-reports==1.1
 djangorestframework==3.8.2
 Pillow==5.2.0
 raven==6.9.0

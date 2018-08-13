@@ -1,4 +1,5 @@
 import os
+from django.urls import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -28,6 +29,20 @@ RAVEN_CONFIG = {
 FILE_UPLOAD_PERMISSIONS = 0o644
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
 FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
+
+# CSP Headers
+CSP_DEFAULT_SRC = ("'self'", )
+CSP_IMG_SRC = ("'self'", "*")
+CSP_FONT_SRC = ("'self'", "https://use.fontawesome.com", "https://fonts.gstatic.com")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://*.fontawesome.com", "https://fonts.googleapis.com")
+CSP_FRAME_SRC = ("https://www.youtube.com", "https://youtu.be")
+
+# CSP Reporting options
+CSP_REPORT_URI = reverse_lazy('report_csp')
+CSP_REPORT_ONLY = True
+CSP_REPORTS_EMAIL_ADMINS = False
+CSP_REPORTS_SAVE = False
+CSP_REPORTS_LOG = True
 
 # Redirect to forum after login by default
 LOGIN_REDIRECT_URL = '/forum'
@@ -71,6 +86,7 @@ INSTALLED_APPS = [
     'precise_bbcode',
     'captcha',
     'rest_framework',
+    'cspreports',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +97,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
     'aether.utils.middleware.TimezoneMiddleware',
 ]
 

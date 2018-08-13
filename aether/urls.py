@@ -9,6 +9,7 @@ urlpatterns = [
     path('forum/', include('aether.forum.urls', namespace='forum')),
     path('api/v1/', include('aether.api.urls', namespace='api')),
     path('admin/', admin.site.urls),
+    path('csp/', include('cspreports.urls')),
 ]
 
 if settings.DEBUG:
