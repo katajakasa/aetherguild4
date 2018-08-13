@@ -152,6 +152,9 @@ def postprocess_bbcode_img(model, object_id, field_name):
         # Fetch urls to cache
         refresh = False
         for url in urls:
+            if BBCodeImage.objects.filter(source_url=url).exists():
+                log.warning("Source url %s is already loaded", url)
+                continue
             if cache_bbcode_image(url):
                 refresh = True
         if refresh:
