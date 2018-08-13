@@ -11,7 +11,7 @@ djangorestframework==3.8.2
 Pillow==5.2.0
 raven==6.9.0
 argon2-cffi==18.1.0
-django-precise-bbcode==1.2.9
+django-precise-bbcode==1.2.10
 pytz==2018.5
 celery==4.2.1
 requests==2.19.1
