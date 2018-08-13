@@ -78,6 +78,7 @@ class EditMessageForm(ModelForm):
             self.fields['title'].initial = self.instance.thread.title
 
         # Only allow attaching galleries for staff
+        self.fields['attached_gallery'].required = False
         if not self.user.is_staff:
             del self.fields['attached_gallery']
 
