@@ -56,6 +56,11 @@ class RegisterForm(UserCreationForm):
                 _("The two email fields didn't match."),
                 code='email_mismatch',
             )
+        if User.objects.filter(email=email2).exists():
+            raise ValidationError(
+                _("Given email is already in use"),
+                code='email_in_use',
+            )
         return email2
 
     @transaction.atomic
