@@ -43,14 +43,8 @@ class ForumPostEditInlineAdmin(admin.TabularInline):
     extra = 0
 
 
-class ForumPostInlineAdmin(admin.TabularInline):
-    model = ForumPost
-    extra = 0
-
-
 class ForumThreadAdmin(admin.ModelAdmin):
     list_display = ('id', 'board', 'user', 'title', 'created_at', 'modified_at', 'sticky', 'closed', 'deleted')
-    inlines = [ForumPostInlineAdmin]
     search_fields = ('title', )
 
 
