@@ -36,12 +36,12 @@ def threads(request, board_id):
             raise Http404
         if not board.can_write(request.user):
             raise Http404
-        form = NewThreadForm(request.POST)
+        form = NewThreadForm(request.POST, user=request.user, board=board)
         if form.is_valid():
-            thread, post = form.save(board=board, user=request.user)
-            return HttpResponseRedirect(reverse('forum:posts', args=(board.id, thread.id)))
+            post = form.save()
+            return HttpResponseRedirect(reverse('forum:posts', args=(board.id, post.thread.id)))
     else:
-        form = NewThreadForm()
+        form = NewThreadForm(user=request.user, board=board)
 
     show_count = request.user.profile.thread_limit if request.user.is_authenticated else settings.FORUM_THREAD_LIMIT
     paginator = Paginator(board.visible_threads(request.user), show_count)
@@ -78,16 +78,16 @@ def posts(request, board_id, thread_id):
             raise Http404
         if thread.closed:
             raise Http404
-        form = NewMessageForm(request.POST)
+        form = NewMessageForm(request.POST, thread=thread, user=request.user)
         if form.is_valid():
-            thread, post = form.save(thread=thread, user=request.user)
+            post = form.save()
             return HttpResponseRedirect("{}?page={}#{}".format(
                 reverse('forum:posts', args=(thread.board.id, thread.id)),
                 post.page_for(request.user),
                 post.id
             ))
     else:
-        form = NewMessageForm()
+        form = NewMessageForm(thread=thread, user=request.user)
 
     # Refresh last viewed values for this user/thread
     if request.user.is_authenticated:

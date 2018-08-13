@@ -7,49 +7,73 @@ from crispy_forms.layout import Submit
 from .models import ForumPost, ForumThread, ForumBoard, ForumPostEdit
 
 
-class NewThreadForm(Form):
+class NewThreadForm(ModelForm):
     title = CharField(label=_("Thread title"), max_length=128, required=True)
-    message = CharField(label=_("First message"), required=True, widget=Textarea)
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        self.board = kwargs.pop('board')
         super(NewThreadForm, self).__init__(*args, **kwargs)
+
+        # Only allow attaching galleries for staff
+        self.fields['attached_gallery'].required = False
+        if not self.user.is_staff:
+            del self.fields['attached_gallery']
+
         self.fields['message'].widget.attrs['class'] = 'bbcode_field'
         self.helper = FormHelper()
         self.helper.add_input(Submit('submit', _('Post')))
 
     @transaction.atomic
-    def save(self, board, user):
-        thread = ForumThread.objects.create(
-            board=board,
-            user=user,
+    def save(self, commit=True):
+        thread = ForumThread(
+            board=self.board,
+            user=self.user,
             title=self.cleaned_data['title']
         )
-        post = ForumPost.objects.create(
-            thread=thread,
-            user=user,
-            message=self.cleaned_data['message']
-        )
-        return thread, post
+        if commit:
+            thread.save()
+
+        post = super(NewThreadForm, self).save(commit=False)
+        post.thread = thread
+        post.user = self.user
+        if commit:
+            post.save()
+        return post
+
+    class Meta:
+        model = ForumPost
+        fields = ('title', 'message', 'attached_gallery')
 
 
-class NewMessageForm(Form):
-    message = CharField(label='', required=True, widget=Textarea)
-
+class NewMessageForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        self.thread = kwargs.pop('thread')
         super(NewMessageForm, self).__init__(*args, **kwargs)
+
+        # Only allow attaching galleries for staff
+        self.fields['attached_gallery'].required = False
+        if not self.user.is_staff:
+            del self.fields['attached_gallery']
+
         self.fields['message'].widget.attrs['class'] = 'bbcode_field'
         self.helper = FormHelper()
         self.helper.add_input(Submit('submit', _('Post')))
 
     @transaction.atomic
-    def save(self, thread, user):
-        thread.set_modified()
-        post = ForumPost.objects.create(
-            thread=thread,
-            user=user,
-            message=self.cleaned_data['message']
-        )
-        return thread, post
+    def save(self, commit=True):
+        self.thread.set_modified()
+        post = super(NewMessageForm, self).save(commit=False)
+        post.user = self.user
+        post.thread = self.thread
+        if commit:
+            post.save()
+        return post
+
+    class Meta:
+        model = ForumPost
+        fields = ('message', 'attached_gallery')
 
 
 class MoveThreadForm(ModelForm):
@@ -72,10 +96,10 @@ class EditMessageForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super(EditMessageForm, self).__init__(*args, **kwargs)
-        if not self.instance.is_first:
-            del self.fields['title']
-        else:
+        if self.instance.is_first:
             self.fields['title'].initial = self.instance.thread.title
+        else:
+            del self.fields['title']
 
         # Only allow attaching galleries for staff
         self.fields['attached_gallery'].required = False
