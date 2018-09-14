@@ -1,4 +1,4 @@
-django==2.1
+django==2.1.1
 psycopg2-binary==2.7.5
 arrow==0.12.1
 django-imagekit==4.0.2
@@ -8,11 +8,11 @@ django-silk==3.0.1
 django-recaptcha==1.4.0
 django-timezone-field==3.0rc1
 django-csp==3.4
-django-csp-reports==1.1
+django-csp-reports==1.2
 djangorestframework==3.8.2
 Pillow==5.2.0
 raven==6.9.0
-argon2-cffi==18.1.0
+argon2-cffi==18.3.0
 django-precise-bbcode==1.2.10
 pytz==2018.5
 celery==4.2.1
