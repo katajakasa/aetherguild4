@@ -33,9 +33,12 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
 # CSP Headers
 CSP_DEFAULT_SRC = ("'self'", )
 CSP_IMG_SRC = ("'self'", "*")
+CSP_SCRIPT_SRC = ("'self'", "https://www.google.com", "https://www.gstatic.com")
 CSP_FONT_SRC = ("'self'", "https://use.fontawesome.com", "https://fonts.gstatic.com")
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://*.fontawesome.com", "https://fonts.googleapis.com")
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://*.fontawesome.com", "https://fonts.googleapis.com",
+                 "https://fonts.gstatic.com")
 CSP_FRAME_SRC = ("https://www.youtube.com", "https://youtu.be")
+CSP_OBJECT_SRC = ("'none'", )
 
 # CSP Reporting options
 CSP_REPORT_URI = reverse_lazy('report_csp')
