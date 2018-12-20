@@ -1,5 +1,5 @@
 django==2.1.4
-psycopg2-binary==2.7.6.1
+psycopg2>=2.7,<2.8 --no-binary :all:
 arrow==0.12.1
 django-imagekit==4.0.2
 django-redis==4.10.0
