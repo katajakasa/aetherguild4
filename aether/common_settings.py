@@ -37,7 +37,7 @@ CSP_SCRIPT_SRC = ("'self'", "https://www.google.com", "https://www.gstatic.com")
 CSP_FONT_SRC = ("'self'", "https://use.fontawesome.com", "https://fonts.gstatic.com")
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://*.fontawesome.com", "https://fonts.googleapis.com",
                  "https://fonts.gstatic.com")
-CSP_FRAME_SRC = ("https://www.youtube.com", "https://youtu.be")
+CSP_FRAME_SRC = ("https://www.youtube.com", "https://youtu.be", "https://www.google.com")
 CSP_OBJECT_SRC = ("'none'", )
 
 # CSP Reporting options
