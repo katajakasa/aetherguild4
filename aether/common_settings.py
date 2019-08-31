@@ -42,7 +42,7 @@ CSP_OBJECT_SRC = ("'none'", )
 
 # CSP Reporting options
 CSP_REPORT_URI = reverse_lazy('report_csp')
-CSP_REPORT_ONLY = False
+CSP_REPORT_ONLY = True
 CSP_REPORTS_EMAIL_ADMINS = False
 CSP_REPORTS_SAVE = False
 CSP_REPORTS_LOG = True
