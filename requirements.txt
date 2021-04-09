@@ -1,4 +1,4 @@
-django==2.2.19
+django==2.2.20
 arrow==1.0.2
 django-imagekit==4.0.2
 django-redis==4.12.1
