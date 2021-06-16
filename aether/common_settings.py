@@ -1,5 +1,9 @@
 import os
 from django.urls import reverse_lazy
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,9 +25,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 FORUM_MESSAGE_LIMIT = 25
 FORUM_THREAD_LIMIT = 25
 
-RAVEN_CONFIG = {
-    'dsn': '',
-}
+# Token for sentry access
+SENTRY_DSN = ''
 
 # Upload limits
 FILE_UPLOAD_PERMISSIONS = 0o644
@@ -54,6 +57,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "aether/static"),
 ]
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
@@ -82,7 +87,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
-    'raven.contrib.django.raven_compat',
     'timezone_field',
     'imagekit',
     'crispy_forms',
@@ -146,14 +150,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Log handlers, insert our own database log handler
+# Log handlers
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'root': {
-        'level': 'WARNING',
-        'handlers': ['sentry', 'console'],
-    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s '
@@ -161,10 +161,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'sentry': {
-            'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
         'console': {
             'level': 'WARNING',
             'class': 'logging.StreamHandler',
@@ -175,18 +171,8 @@ LOGGING = {
         'tasks': {
             'level': 'INFO',
         },
-        'raven': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
-        },
         '': {
-            'handlers': ['console', 'sentry'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
@@ -263,8 +249,19 @@ CELERY_TASK_PUBLISH_RETRY_POLICY = {
 }
 
 
-def make_email_conf(debug_mode):
+def make_email_conf(debug_mode: bool) -> str:
     if debug_mode:
         return 'django.core.mail.backends.console.EmailBackend'
     else:
         return 'django.core.mail.backends.smtp.EmailBackend'
+
+
+def setup_sentry(dsn: str) -> None:
+    sentry_sdk.init(
+        dsn=dsn,
+        integrations=[
+            DjangoIntegration(),
+            RedisIntegration(),
+            CeleryIntegration(),
+        ]
+    )

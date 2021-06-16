@@ -1,4 +1,4 @@
-import arrow
+from datetime import datetime, timezone
 from django.db.models import Subquery, IntegerField
 
 
@@ -15,4 +15,4 @@ class SQCount(Subquery):
 
 
 def utc_now():
-    return arrow.utcnow().datetime
+    return datetime.now(timezone.utc)
