@@ -8,7 +8,7 @@ django-timezone-field==4.1.2
 django-csp==3.7
 django-csp-reports==1.4
 djangorestframework==3.12.4
-Pillow==9.0.1
+Pillow==9.3.0
 sentry-sdk==1.1.0
 argon2-cffi==20.1.0
 django-precise-bbcode==1.2.13
