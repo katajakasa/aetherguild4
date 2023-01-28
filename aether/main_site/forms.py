@@ -1,5 +1,3 @@
-import pytz
-
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm, PasswordChangeForm
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -104,7 +102,7 @@ class ProfileForm(ModelForm):
     def save(self, *args, **kwargs):
         self.user.email = self.cleaned_data['email']
         self.user.save()
-        timezone.activate(pytz.timezone(str(self.cleaned_data['timezone'])))
+        timezone.activate(str(self.cleaned_data['timezone']))
         ret = super(ProfileForm, self).save(*args, **kwargs)
         return ret
 
