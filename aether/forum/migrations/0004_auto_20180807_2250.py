@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('forum', '0003_bbcodeimage'),
+        ("forum", "0003_bbcodeimage"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='bbcodeimage',
-            options={'verbose_name': 'BBCode Image', 'verbose_name_plural': 'BBCode Images'},
+            name="bbcodeimage",
+            options={"verbose_name": "BBCode Image", "verbose_name_plural": "BBCode Images"},
         ),
         migrations.AlterField(
-            model_name='bbcodeimage',
-            name='original',
-            field=models.ImageField(upload_to='bbcode'),
+            model_name="bbcodeimage",
+            name="original",
+            field=models.ImageField(upload_to="bbcode"),
         ),
     ]

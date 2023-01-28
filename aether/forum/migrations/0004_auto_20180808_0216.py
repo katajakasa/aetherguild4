@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('forum', '0003_bbcodeimage'),
+        ("forum", "0003_bbcodeimage"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='bbcodeimage',
-            options={'verbose_name': 'BBCode Image', 'verbose_name_plural': 'BBCode Images'},
+            name="bbcodeimage",
+            options={"verbose_name": "BBCode Image", "verbose_name_plural": "BBCode Images"},
         ),
     ]

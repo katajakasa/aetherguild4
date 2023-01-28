@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
-from django.db.models import Subquery, IntegerField
+
+from django.db.models import IntegerField, Subquery
 
 
 def get_page(request):
     try:
-        return max(int(request.GET.get('page', 1)), 1)
+        return max(int(request.GET.get("page", 1)), 1)
     except ValueError:
         return 1
 
