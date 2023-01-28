@@ -45,15 +45,6 @@ python manage.py migrate
 
 After this, restart the WSGI/ASGI runner.
 
-Running tests
--------------
-
-Just do `pytest` in the main directory :)
-
-To also get coverage, do `pytest --cov=Instanssi`
-
-Also, you can run tests in parallel using `pytest -n 4`.
-
 Production deps
 ---------------
 
