@@ -1,5 +1,6 @@
-from django.db.models import Model, CharField, DateTimeField, BooleanField, Index
+from django.db.models import BooleanField, CharField, DateTimeField, Index, Model
 from precise_bbcode.fields import BBCodeTextField
+
 from aether.utils.misc import utc_now
 
 
@@ -15,7 +16,7 @@ class NewsItem(Model):
         return self.header
 
     class Meta:
-        app_label = 'main_site'
+        app_label = "main_site"
         indexes = [
-            Index(fields=['created_at', 'deleted']),
+            Index(fields=["created_at", "deleted"]),
         ]
