@@ -100,6 +100,7 @@ INSTALLED_APPS = [
     "timezone_field",
     "imagekit",
     "crispy_forms",
+    "crispy_bootstrap4",
     "precise_bbcode",
     "captcha",
     "rest_framework",
