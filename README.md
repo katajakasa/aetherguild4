@@ -45,13 +45,6 @@ python manage.py migrate
 
 After this, restart the WSGI/ASGI runner.
 
-Production deps
----------------
-
-To install in production, remember to generate a new requirements.txt file.
-
-`poetry export --with=runtime -f requirements.txt -o requirements.txt`.
-
 License
 -------
 MIT. Please refer to `LICENSE` for more information.
