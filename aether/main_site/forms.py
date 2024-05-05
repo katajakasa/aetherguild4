@@ -1,5 +1,6 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from django.conf import settings
 from django.contrib.auth.forms import (
     AuthenticationForm,
     PasswordChangeForm,
@@ -44,6 +45,12 @@ class RegisterForm(UserCreationForm):
         help_text=_("Enter the same email as before, for verification."),
     )
     alias = CharField(label=_("User alias"), help_text=_("Username visible on the forums"), max_length=32)
+    key = CharField(
+        label=_("Registration key"),
+        help_text=_("Registration token from any of the admins"),
+        required=True,
+        max_length=32,
+    )
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
@@ -64,6 +71,14 @@ class RegisterForm(UserCreationForm):
                 code="email_in_use",
             )
         return email2
+
+    def clean_key(self):
+        key = self.cleaned_data.get("key")
+        if key != settings.REGISTRATION_KEY:
+            raise ValidationError(
+                _("Invalid registration key"),
+                code="key_mismatch",
+            )
 
     @transaction.atomic
     def save(self, commit=True):
