@@ -31,7 +31,7 @@ urlpatterns = [
         name="login",
     ),
     path("accounts/profile/", views.profile, name="profile"),
-    path("accounts/logout/", LogoutView.as_view(template_name="main_site/logged_out.html"), name="logout"),
+    path("accounts/logout/", views.logout, name="logout"),
     path(
         "accounts/password_reset/",
         PasswordResetView.as_view(

@@ -1,3 +1,4 @@
+from django.contrib.auth import logout as logout_user
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import HttpResponseRedirect, render
@@ -24,6 +25,11 @@ def faq(request):
 
 def registered(request):
     return render(request, "main_site/registered.html")
+
+
+def logout(request):
+    logout_user(request)
+    return render(request, "main_site/logged_out.html")
 
 
 def register(request):
