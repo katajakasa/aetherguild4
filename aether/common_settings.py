@@ -1,11 +1,5 @@
 import os
 
-import sentry_sdk
-from django.urls import reverse_lazy
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Static and mediafile directories
@@ -25,9 +19,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 # Default forum message/thread paging limits
 FORUM_MESSAGE_LIMIT = 25
 FORUM_THREAD_LIMIT = 25
-
-# Token for sentry access
-SENTRY_DSN = ""
 
 # Upload limits
 FILE_UPLOAD_PERMISSIONS = 0o644
@@ -54,13 +45,6 @@ CSP_STYLE_SRC = (
 )
 CSP_FRAME_SRC = ("https://www.youtube.com", "https://youtu.be", "https://www.google.com")
 CSP_OBJECT_SRC = ("'none'",)
-
-# CSP Reporting options
-CSP_REPORT_URI = reverse_lazy("report_csp")
-CSP_REPORT_ONLY = True
-CSP_REPORTS_EMAIL_ADMINS = False
-CSP_REPORTS_SAVE = False
-CSP_REPORTS_LOG = True
 
 # Redirect to forum after login by default
 LOGIN_REDIRECT_URL = "/forum"
@@ -102,9 +86,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap4",
     "precise_bbcode",
-    "captcha",
     "rest_framework",
-    "cspreports",
 ]
 
 MIDDLEWARE = [
@@ -207,9 +189,6 @@ DEFAULT_FROM_EMAIL = "no-reply@aetherguild.net"
 # Cache sessions
 SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
-# Recaptcha for registration
-NOCAPTCHA = True
-
 # Use Redis cache
 CACHES = {
     "default": {
@@ -256,14 +235,3 @@ def make_email_conf(debug_mode: bool) -> str:
         return "django.core.mail.backends.console.EmailBackend"
     else:
         return "django.core.mail.backends.smtp.EmailBackend"
-
-
-def setup_sentry(dsn: str) -> None:
-    sentry_sdk.init(
-        dsn=dsn,
-        integrations=[
-            DjangoIntegration(),
-            RedisIntegration(),
-            CeleryIntegration(),
-        ],
-    )

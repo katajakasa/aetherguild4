@@ -1,4 +1,3 @@
-from captcha.fields import ReCaptchaField
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django.contrib.auth.forms import (
@@ -45,7 +44,6 @@ class RegisterForm(UserCreationForm):
         help_text=_("Enter the same email as before, for verification."),
     )
     alias = CharField(label=_("User alias"), help_text=_("Username visible on the forums"), max_length=32)
-    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)

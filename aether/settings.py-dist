@@ -22,6 +22,3 @@ RECAPTCHA_PRIVATE_KEY = ''
 
 # Initialize email configuration
 EMAIL_BACKEND = make_email_conf(DEBUG)
-
-# Initialize sentry
-setup_sentry(SENTRY_DSN)
