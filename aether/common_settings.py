@@ -222,6 +222,7 @@ CELERY_BROKER_TRANSPORT_OPTIONS = {
     "fanout_prefix": True,
     "fanout_patterns": True,
 }
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_TASK_PUBLISH_RETRY_POLICY = {
     "max_retries": 3,
     "interval_start": 300,
