@@ -264,7 +264,12 @@ class ForumPost(Model):
     created_at = DateTimeField(default=utc_now, null=False)
     deleted = BooleanField(default=False, null=False)
     attached_gallery = ForeignKey(
-        GalleryGroup, on_delete=SET_NULL, null=True, default=None, related_name="linked_posts"
+        GalleryGroup,
+        on_delete=SET_NULL,
+        null=True,
+        default=None,
+        related_name="linked_posts",
+        blank=True,
     )
 
     def __str__(self) -> str:
