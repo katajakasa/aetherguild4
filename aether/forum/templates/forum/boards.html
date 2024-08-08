@@ -28,10 +28,12 @@
                     <small class="text-muted">Posts</small>
                 </div>
                 <div class="col-sm-4 text-right {% if user.is_authenticated and board.new_posts_count %}prio-link{% endif %}">
+                    {% if board.latest_post %}
                     <a href="{% url 'forum:posts' board.id board.latest_post.thread.id %}?page={{ board.latest_post|page_for:user }}#{{ board.latest_post.id }}">
                         {{ board.latest_post.thread.title }}<br />
                         <small class="text-muted">{{ board.latest_post.user.profile.alias }}, {{ board.latest_post.created_at }}</small>
                     </a>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}

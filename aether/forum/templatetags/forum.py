@@ -13,7 +13,10 @@ def boards_readable_by(section, user):
     boards = [x for x in section.visible_boards(user) if x.can_read(user)]
     latest_posts = section.get_latest_posts([x.latest_post_id for x in boards])
     for board in boards:
-        board.latest_post = latest_posts[board.latest_post_id]  # Hacketyhack
+        if board.latest_post_id is None:
+            board.latest_post = None
+        else:
+            board.latest_post = latest_posts[board.latest_post_id]  # Hacketyhack
     return boards
 
 
