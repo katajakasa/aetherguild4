@@ -163,7 +163,7 @@ LOGGING = {
     },
 }
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "not-set"
 TIME_ZONE = "UTC"
 USE_I18N = False
 USE_L10N = False
