@@ -41,9 +41,7 @@ class YoutubeTag(BBCodeTag):
         <div class="embed-responsive embed-responsive-16by9">
             <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/{}?rel=0" allowfullscreen></iframe>
         </div>
-        """.format(
-            code
-        )
+        """.format(code)
 
 
 class ImageTag(BBCodeTag):
@@ -115,16 +113,12 @@ class QuoteTag(BBCodeTag):
                 <div class="bbcode-quote">
                     <p class="mb-0">{}</p>
                     <footer class="blockquote-footer">{}</footer>
-                </div>""".format(
-                value, option
-            )
+                </div>""".format(value, option)
         else:
             return """
                 <div class="bbcode-quote">
                     <p class="mb-0">{}</p>
-                </div>""".format(
-                value
-            )
+                </div>""".format(value)
 
 
 tag_pool.register_tag(ImageTag)
