@@ -235,8 +235,9 @@ CELERY_TASK_PUBLISH_RETRY_POLICY = {
 }
 
 
-def make_email_conf(debug_mode: bool) -> str:
+def make_email_conf(debug_mode: bool) -> dict:
     if debug_mode:
-        return "django.core.mail.backends.console.EmailBackend"
+        backend = "django.core.mail.backends.console.EmailBackend"
     else:
-        return "django.core.mail.backends.smtp.EmailBackend"
+        backend = "django.core.mail.backends.smtp.EmailBackend"
+    return {"default": {"BACKEND": backend}}
