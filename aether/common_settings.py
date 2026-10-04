@@ -1,5 +1,7 @@
 import os
 
+from django.utils.csp import CSP
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Static and mediafile directories
@@ -25,26 +27,28 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
 FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8
 
-# CSP Headers
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_IMG_SRC = ("'self'", "*")
-CSP_SCRIPT_SRC = (
-    "'self'",
-    "'unsafe-inline'",
-    "'unsafe-eval'",
-    "https://www.google.com",
-    "https://www.gstatic.com",
-)
-CSP_FONT_SRC = ("'self'", "https://use.fontawesome.com", "https://fonts.gstatic.com")
-CSP_STYLE_SRC = (
-    "'self'",
-    "'unsafe-inline'",
-    "https://*.fontawesome.com",
-    "https://fonts.googleapis.com",
-    "https://fonts.gstatic.com",
-)
-CSP_FRAME_SRC = ("https://www.youtube.com", "https://youtu.be", "https://www.google.com")
-CSP_OBJECT_SRC = ("'none'",)
+# CSP Headers (Django built-in CSP middleware)
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "img-src": [CSP.SELF, "*"],
+    "script-src": [
+        CSP.SELF,
+        CSP.UNSAFE_INLINE,
+        CSP.UNSAFE_EVAL,
+        "https://www.google.com",
+        "https://www.gstatic.com",
+    ],
+    "font-src": [CSP.SELF, "https://use.fontawesome.com", "https://fonts.gstatic.com"],
+    "style-src": [
+        CSP.SELF,
+        CSP.UNSAFE_INLINE,
+        "https://*.fontawesome.com",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
+    ],
+    "frame-src": ["https://www.youtube.com", "https://youtu.be", "https://www.google.com"],
+    "object-src": [CSP.NONE],
+}
 
 # Redirect to forum after login by default
 LOGIN_REDIRECT_URL = "/forum"
@@ -97,7 +101,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "csp.middleware.CSPMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "aether.utils.middleware.TimezoneMiddleware",
 ]
 

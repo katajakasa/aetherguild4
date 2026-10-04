@@ -557,28 +557,6 @@ files = [
 django = ">=5.2"
 
 [[package]]
-name = "django-csp"
-version = "4.0"
-description = "Django Content Security Policy support."
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "django_csp-4.0-py3-none-any.whl", hash = "sha256:d5a0a05463a6b75a4f1fc1828c58c89af8db9364d09fc6e12f122b4d7f3d00dc"},
-    {file = "django_csp-4.0.tar.gz", hash = "sha256:b27010bb702eb20a3dad329178df2b61a2b82d338b70fbdc13c3a3bd28712833"},
-]
-
-[package.dependencies]
-django = ">=4.2"
-packaging = "*"
-
-[package.extras]
-dev = ["django-stubs[compatible-mypy]", "jinja2 (>=2.9.6)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-django", "pytest-ruff", "sphinx", "sphinx-rtd-theme", "tox", "tox-gh-actions", "types-setuptools"]
-jinja2 = ["jinja2 (>=2.9.6)"]
-tests = ["jinja2 (>=2.9.6)", "pytest", "pytest-cov", "pytest-django", "pytest-ruff"]
-typing = ["django-stubs[compatible-mypy]", "jinja2 (>=2.9.6)", "mypy", "pytest", "pytest-django", "types-setuptools"]
-
-[[package]]
 name = "django-imagekit"
 version = "6.1.1"
 description = "Automated image processing for Django models."
@@ -1383,4 +1361,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "52f2e35550f2aca7491782a067504307768427276313e9604d490a0acb4913cb"
+content-hash = "0262fe712fba40ef55861d4bd9d2f6b918efb95aba562a96f8848d913f6b3e25"
