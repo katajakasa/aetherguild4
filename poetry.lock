@@ -168,7 +168,10 @@ click = ">=8.1.2,<9.0"
 click-didyoumean = ">=0.3.0"
 click-plugins = ">=1.1.1"
 click-repl = ">=0.2.0"
-kombu = ">=5.6.0"
+kombu = [
+    {version = ">=5.6.0"},
+    {version = "*", extras = ["redis"], optional = true, markers = "extra == \"redis\""},
+]
 python-dateutil = ">=2.8.2"
 tzlocal = "*"
 vine = ">=5.1.0,<6.0"
@@ -595,28 +598,6 @@ django = ">=3.2"
 pillow = ">=2.2.1"
 
 [[package]]
-name = "django-redis"
-version = "7.0.0"
-description = "Full featured redis cache backend for Django."
-optional = false
-python-versions = ">=3.10"
-groups = ["main"]
-files = [
-    {file = "django_redis-7.0.0-py3-none-any.whl", hash = "sha256:4b23aa6e0cd0937bb1242e9a463809e6004de3ca2150f34e986306bb6220d688"},
-    {file = "django_redis-7.0.0.tar.gz", hash = "sha256:e48491c862f4350b0747ceb1016700686fb93c4f4e0fb9c490fe6c6658ffd933"},
-]
-
-[package.dependencies]
-Django = ">=5.2,<7.0"
-redis = ">=4.0.2"
-
-[package.extras]
-hiredis = ["redis[hiredis] (>=4.0.2)"]
-lz4 = ["lz4 (>=0.15)"]
-msgpack = ["msgpack (>=0.6.0)"]
-pyzstd = ["pyzstd (>=0.15)"]
-
-[[package]]
 name = "django-silk"
 version = "5.6.0"
 description = "Silky smooth profiling for the Django Framework"
@@ -773,6 +754,7 @@ files = [
 [package.dependencies]
 amqp = ">=5.1.1,<6.0.0"
 packaging = "*"
+redis = {version = ">=4.5.2,<4.5.5 || >4.5.5,<5.0.2 || >5.0.2,<6.5", optional = true, markers = "extra == \"redis\""}
 tzdata = ">=2025.2"
 vine = "5.1.0"
 
@@ -1361,4 +1343,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "0262fe712fba40ef55861d4bd9d2f6b918efb95aba562a96f8848d913f6b3e25"
+content-hash = "daa95a0eeb8bf642efe467706baa5f6b034321e8b50fd09b72bd71eda451b234"
