@@ -23,4 +23,4 @@ RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 
 # Initialize email configuration
-EMAIL_BACKEND = make_email_conf(DEBUG)
+MAILERS = make_email_conf(DEBUG)

@@ -8,26 +8,24 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.13"
-django = "^5.2.1"
-django-imagekit = "^5.0.0"
-django-redis = "^5.4.0"
-django-crispy-forms = "^2.4"
-django-silk = "^5.3.2"
-django-timezone-field = "^7.1"
-django-csp = "^4.0"
-djangorestframework = "^3.16.0"
-Pillow = "^11.3.0"
+django = "^6.1.1"
+django-imagekit = "^6.1.1"
+django-crispy-forms = "^2.7"
+django-silk = "^5.6.0"
+django-timezone-field = "^7.2.2"
+djangorestframework = "^3.18.1"
+Pillow = "^12.3.0"
 argon2-cffi = "^25.1.0"
 django-precise-bbcode = "^1.2.16"
-celery = "^5.5.3"
-requests = "^2.32.3"
-uvicorn = "^0.35.0"
-psycopg = {extras = ["binary", "pool"], version = "^3.2.9"}
-crispy-bootstrap4 = "^2025.6"
+celery = {extras = ["redis"], version = "^5.6.3"}
+requests = "^2.34.2"
+uvicorn = "^0.54.0"
+psycopg = {extras = ["binary", "pool"], version = "^3.3.6"}
+crispy-bootstrap4 = "^2026.2"
 
 [tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-isort = "^6.0.0"
+black = "^26.10.0"
+isort = "^9.0.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -38,4 +36,4 @@ profile = "black"
 
 [tool.black]
 line-length = 109
-target-version = ['py311']
+target-version = ['py313']
